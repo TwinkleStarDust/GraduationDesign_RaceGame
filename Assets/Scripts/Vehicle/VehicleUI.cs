@@ -21,12 +21,17 @@ public class VehicleUI : MonoBehaviour
     [Tooltip("最大速度 (用于速度表)")]
     [SerializeField] private float maxSpeedForGauge = 200.0f;
 
-    [Header("调试信息")]
-    [Tooltip("是否显示调试信息")]
-    [SerializeField] private bool showDebugInfo = true;
+    [Tooltip("驱动类型文本")]
+    [SerializeField] private TextMeshProUGUI driveTypeText;
 
-    [Tooltip("调试文本")]
-    [SerializeField] private TextMeshProUGUI debugText;
+    [Tooltip("漂移指示器")]
+    [SerializeField] private Image driftIndicator;
+
+    [Tooltip("漂移指示器颜色")]
+    [SerializeField] private Color driftColor = Color.red;
+
+    // 私有变量
+    private Color normalColor;
 
     /// <summary>
     /// 初始化组件
@@ -55,10 +60,14 @@ public class VehicleUI : MonoBehaviour
             Debug.LogWarning("未指定速度表！");
         }
 
-        if (showDebugInfo && debugText == null)
+        // 保存漂移指示器的正常颜色
+        if (driftIndicator != null)
         {
-            Debug.LogWarning("启用了调试信息但未指定调试文本！");
+            normalColor = driftIndicator.color;
         }
+
+        // 更新驱动类型文本
+        UpdateDriveTypeText();
     }
 
     /// <summary>
@@ -83,42 +92,61 @@ public class VehicleUI : MonoBehaviour
             speedometerFill.fillAmount = Mathf.Clamp01(currentSpeed / maxSpeedForGauge);
         }
 
-        // 更新调试信息
-        if (showDebugInfo && debugText != null)
+        // 更新漂移指示器
+        UpdateDriftIndicator();
+    }
+
+    /// <summary>
+    /// 更新驱动类型文本
+    /// </summary>
+    private void UpdateDriveTypeText()
+    {
+        if (driveTypeText == null || vehicleController == null) return;
+
+        // 获取驱动类型
+        VehicleController.DriveType driveType = vehicleController.GetDriveType();
+
+        // 设置文本
+        switch (driveType)
         {
-            UpdateDebugInfo();
+            case VehicleController.DriveType.FrontWheelDrive:
+                driveTypeText.text = "前轮驱动 (FWD)";
+                break;
+            case VehicleController.DriveType.RearWheelDrive:
+                driveTypeText.text = "后轮驱动 (RWD)";
+                break;
+            case VehicleController.DriveType.AllWheelDrive:
+                driveTypeText.text = "四轮驱动 (AWD)";
+                break;
         }
     }
 
     /// <summary>
-    /// 更新调试信息
+    /// 更新漂移指示器
     /// </summary>
-    private void UpdateDebugInfo()
+    private void UpdateDriftIndicator()
     {
-        // 获取车辆信息
-        string debugInfo = "";
+        if (driftIndicator == null || vehicleController == null) return;
 
-        // 添加速度信息
-        debugInfo += "速度: " + Mathf.Round(vehicleController.GetCurrentSpeed()).ToString() + " km/h\n";
+        // 获取漂移状态
+        bool isDrifting = vehicleController.IsDrifting();
+        float driftFactor = vehicleController.GetDriftFactor();
 
-        // 添加物理信息
-        Rigidbody rb = vehicleController.GetComponent<Rigidbody>();
-        if (rb != null)
+        // 更新指示器颜色
+        if (isDrifting)
         {
-            debugInfo += "质量: " + rb.mass.ToString("F1") + " kg\n";
-            debugInfo += "速度向量: " + rb.linearVelocity.ToString("F1") + "\n";
-            debugInfo += "角速度: " + rb.angularVelocity.ToString("F1") + "\n";
+            // 根据漂移强度插值颜色
+            driftIndicator.color = Color.Lerp(normalColor, driftColor, driftFactor);
+
+            // 可以添加一些动画效果，如缩放或闪烁
+            float pulseFactor = 0.8f + Mathf.PingPong(Time.time * 2f, 0.4f);
+            driftIndicator.transform.localScale = Vector3.one * pulseFactor;
         }
-
-        // 添加控制信息
-        debugInfo += "\n控制说明:\n";
-        debugInfo += "W/S - 前进/后退\n";
-        debugInfo += "A/D - 左转/右转\n";
-        debugInfo += "空格 - 手刹\n";
-        debugInfo += "R - 重置车辆\n";
-        debugInfo += "V - 切换视角\n";
-
-        // 设置调试文本
-        debugText.text = debugInfo;
+        else
+        {
+            // 恢复正常颜色和大小
+            driftIndicator.color = normalColor;
+            driftIndicator.transform.localScale = Vector3.one;
+        }
     }
 }
