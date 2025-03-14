@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 /// <summary>
 /// 车辆控制器脚本
@@ -106,6 +107,38 @@ public class VehicleController : MonoBehaviour
     [Tooltip("最大音调")]
     [SerializeField] private float maxPitch = 2.0f;
 
+    [Header("车轮视觉效果")]
+    [Tooltip("车轮位置平滑度")]
+    [Range(5, 30)]
+    [SerializeField] private float wheelPositionSmoothing = 15f;
+
+    [Tooltip("车轮旋转平滑度")]
+    [Range(5, 30)]
+    [SerializeField] private float wheelRotationSmoothing = 15f;
+
+    [Header("车辆翻转设置")]
+    [Tooltip("车辆翻转力矩")]
+    [SerializeField] private float flipTorque = 20000f;
+
+    [Tooltip("检测侧翻的角度阈值")]
+    [SerializeField] private float flipDetectionAngle = 45f;
+
+    [Tooltip("检测倒置的角度阈值")]
+    [SerializeField] private float upsideDownDetectionAngle = 120f;
+
+    [Tooltip("翻转恢复速度")]
+    [SerializeField] private float flipRecoverySpeed = 2f;
+
+    [Header("空中控制设置")]
+    [Tooltip("空中翻滚力矩")]
+    [SerializeField] private float airRollTorque = 100000f;
+
+    [Tooltip("空中俯仰力矩")]
+    [SerializeField] private float airPitchTorque = 80000f;
+
+    [Tooltip("检测空中状态的时间阈值(秒)")]
+    [SerializeField] private float airTimeThreshold = 0.3f;
+
     // 私有变量
     private Rigidbody vehicleRigidbody;
     private float currentSpeed;
@@ -129,6 +162,21 @@ public class VehicleController : MonoBehaviour
     private Vector3 lastPosition;
     private bool isStuck = false;
 
+    // 添加车轮旋转相关变量
+    private float[] wheelRotationAngles = new float[4];
+
+    private bool isFlipped = false;
+    private bool isUpsideDown = false;
+    private float currentFlipTorque = 0f;
+    private bool isInAir = false;
+    private float airTime = 0f;
+    private bool showFlipPrompt = false;
+    private bool showAirControlPrompt = false;
+
+    // 传送事件
+    public event Action OnBeforeTeleport;
+    public event Action OnAfterTeleport;
+
     /// <summary>
     /// 初始化组件和设置
     /// </summary>
@@ -141,8 +189,15 @@ public class VehicleController : MonoBehaviour
         {
             vehicleRigidbody.centerOfMass = new Vector3(0, centerOfMassHeight, 0);
 
-            // 确保车辆在静止时不会旋转
-            vehicleRigidbody.inertiaTensor = new Vector3(1500, 1500, 1500);
+            // 确保车辆在静止时不会旋转，但在空中时能够自由旋转
+            vehicleRigidbody.inertiaTensor = new Vector3(1000, 1000, 1000);
+
+            // 设置合适的阻力
+            vehicleRigidbody.linearDamping = 0.1f;
+            vehicleRigidbody.angularDamping = 0.05f;
+
+            // 确保使用连续动态碰撞检测，避免高速穿透
+            vehicleRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
         else
         {
@@ -248,6 +303,9 @@ public class VehicleController : MonoBehaviour
 
         // 更新漂移声音
         UpdateDriftSound();
+
+        // 更新空中状态
+        UpdateAirState();
     }
 
     /// <summary>
@@ -255,6 +313,9 @@ public class VehicleController : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {
+        // 检查车辆状态
+        CheckVehicleState();
+
         // 应用转向
         ApplySteering();
 
@@ -267,8 +328,20 @@ public class VehicleController : MonoBehaviour
         // 更新车轮模型
         UpdateWheelModels();
 
-        // 防翻滚保护
-        StabilizeVehicle();
+        // 处理车辆翻转
+        HandleVehicleFlip();
+
+        // 处理空中控制
+        HandleAirControl();
+
+        // 防翻滚保护 (仅在非侧翻和非空中状态下启用)
+        if (!isFlipped && !isUpsideDown && !isInAir)
+        {
+            StabilizeVehicle();
+        }
+
+        // 限制最大速度
+        LimitMaxSpeed();
     }
 
     /// <summary>
@@ -541,16 +614,16 @@ public class VehicleController : MonoBehaviour
     /// </summary>
     private void UpdateWheelModels()
     {
-        UpdateWheelModel(frontLeftWheel, frontLeftWheelTransform);
-        UpdateWheelModel(frontRightWheel, frontRightWheelTransform);
-        UpdateWheelModel(rearLeftWheel, rearLeftWheelTransform);
-        UpdateWheelModel(rearRightWheel, rearRightWheelTransform);
+        UpdateWheelModel(frontLeftWheel, frontLeftWheelTransform, 0);
+        UpdateWheelModel(frontRightWheel, frontRightWheelTransform, 1);
+        UpdateWheelModel(rearLeftWheel, rearLeftWheelTransform, 2);
+        UpdateWheelModel(rearRightWheel, rearRightWheelTransform, 3);
     }
 
     /// <summary>
     /// 更新单个车轮模型
     /// </summary>
-    private void UpdateWheelModel(WheelCollider collider, Transform wheelTransform)
+    private void UpdateWheelModel(WheelCollider collider, Transform wheelTransform, int wheelIndex)
     {
         if (collider == null || wheelTransform == null) return;
 
@@ -559,9 +632,29 @@ public class VehicleController : MonoBehaviour
         Quaternion rotation;
         collider.GetWorldPose(out position, out rotation);
 
-        // 应用到车轮模型
-        wheelTransform.position = position;
-        wheelTransform.rotation = rotation;
+        // 平滑过渡位置
+        wheelTransform.position = Vector3.Lerp(wheelTransform.position, position, Time.deltaTime * wheelPositionSmoothing);
+
+        // 处理车轮旋转
+        // 1. 获取车轮的RPM并计算旋转增量
+        float rpm = collider.rpm;
+        float rotationDelta = rpm * 6f * Time.deltaTime; // 6 = 360/60 (一分钟一圈)
+
+        // 2. 累积旋转角度
+        wheelRotationAngles[wheelIndex] += rotationDelta;
+
+        // 3. 创建最终旋转
+        // 先应用车轮的基本方向（由WheelCollider决定，包含转向和悬挂）
+        Quaternion baseRotation = rotation;
+
+        // 然后应用车轮自身的旋转（绕X轴）
+        Quaternion spinRotation = Quaternion.Euler(wheelRotationAngles[wheelIndex], 0, 0);
+
+        // 组合旋转
+        Quaternion finalRotation = baseRotation * spinRotation;
+
+        // 4. 平滑过渡旋转
+        wheelTransform.rotation = Quaternion.Slerp(wheelTransform.rotation, finalRotation, Time.deltaTime * wheelRotationSmoothing);
     }
 
     /// <summary>
@@ -704,6 +797,483 @@ public class VehicleController : MonoBehaviour
 
             lastPosition = transform.position;
             lastPositionCheckTime = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// 限制车辆最大速度
+    /// </summary>
+    private void LimitMaxSpeed()
+    {
+        if (vehicleRigidbody == null) return;
+
+        // 获取当前速度（m/s）
+        float currentSpeedMS = vehicleRigidbody.linearVelocity.magnitude;
+
+        // 将最大速度从km/h转换为m/s
+        float maxSpeedMS = maxSpeed * KMH_TO_MS;
+        float maxReverseSpeedMS = maxReverseSpeed * KMH_TO_MS;
+
+        // 检查是否超过最大速度
+        if (currentSpeedMS > maxSpeedMS)
+        {
+            // 获取速度方向
+            Vector3 velocityDirection = vehicleRigidbody.linearVelocity.normalized;
+
+            // 设置为最大允许速度
+            vehicleRigidbody.linearVelocity = velocityDirection * maxSpeedMS;
+        }
+
+        // 检查是否超过最大后退速度
+        if (currentSpeedMS > maxReverseSpeedMS)
+        {
+            // 获取本地空间中的速度
+            Vector3 localVelocity = transform.InverseTransformDirection(vehicleRigidbody.linearVelocity);
+
+            // 如果是后退
+            if (localVelocity.z < -0.5f)
+            {
+                // 获取速度方向
+                Vector3 velocityDirection = vehicleRigidbody.linearVelocity.normalized;
+
+                // 设置为最大允许后退速度
+                vehicleRigidbody.linearVelocity = velocityDirection * maxReverseSpeedMS;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 检查车辆状态
+    /// </summary>
+    private void CheckVehicleState()
+    {
+        // 计算车辆与地面的角度
+        float angle = Vector3.Angle(transform.up, Vector3.up);
+
+        // 检查是否侧翻
+        bool wasFlipped = isFlipped;
+        isFlipped = angle > flipDetectionAngle && angle < upsideDownDetectionAngle;
+
+        // 检查是否倒置
+        bool wasUpsideDown = isUpsideDown;
+        isUpsideDown = angle > upsideDownDetectionAngle;
+
+        // 更新UI提示状态
+        showFlipPrompt = isFlipped || isUpsideDown;
+
+        // 如果刚刚进入侧翻状态，禁用所有车轮的驱动力
+        if (isFlipped && !wasFlipped)
+        {
+            DisableWheelDrive();
+        }
+        // 如果刚刚进入倒置状态，禁用所有车轮的驱动力
+        else if (isUpsideDown && !wasUpsideDown)
+        {
+            DisableWheelDrive();
+        }
+        // 如果刚刚恢复正常状态，恢复车轮驱动力
+        else if (!isFlipped && !isUpsideDown && (wasFlipped || wasUpsideDown))
+        {
+            SetupDriveTypeFactors();
+        }
+    }
+
+    /// <summary>
+    /// 禁用所有车轮的驱动力
+    /// </summary>
+    private void DisableWheelDrive()
+    {
+        frontLeftWheel.motorTorque = 0;
+        frontRightWheel.motorTorque = 0;
+        rearLeftWheel.motorTorque = 0;
+        rearRightWheel.motorTorque = 0;
+    }
+
+    /// <summary>
+    /// 处理车辆翻转
+    /// </summary>
+    private void HandleVehicleFlip()
+    {
+        // 如果车辆没有侧翻或倒置，不需要处理
+        if (!isFlipped && !isUpsideDown) return;
+
+        // 获取当前速度
+        float currentSpeedMS = vehicleRigidbody.linearVelocity.magnitude;
+
+        // 如果速度过高，不允许翻转（但允许更高的速度阈值）
+        if (currentSpeedMS > 8f) return;
+
+        // 确定车辆的翻转方向
+        Vector3 localRight = Vector3.Cross(transform.up, Vector3.up);
+        float rightDot = Vector3.Dot(transform.right, localRight);
+
+        // 确定车辆是向左侧翻还是向右侧翻
+        bool isFlippedToRight = rightDot < 0; // 车辆右侧着地（向左侧翻）
+        bool isFlippedToLeft = rightDot > 0;  // 车辆左侧着地（向右侧翻）
+
+        // 根据车辆翻转方向调整输入逻辑
+        float adjustedInput = 0f;
+
+        if (isFlippedToRight && steeringInput < 0) // 右侧着地，按A键（向左）
+        {
+            adjustedInput = -steeringInput; // 反转输入，使A键产生向右的力
+        }
+        else if (isFlippedToLeft && steeringInput > 0) // 左侧着地，按D键（向右）
+        {
+            adjustedInput = -steeringInput; // 反转输入，使D键产生向左的力
+        }
+        else
+        {
+            adjustedInput = steeringInput; // 其他情况保持原输入
+        }
+
+        // 计算目标翻转力矩
+        float targetFlipTorque = 0f;
+        if (adjustedInput != 0)
+        {
+            targetFlipTorque = adjustedInput * flipTorque;
+        }
+
+        // 平滑过渡翻转力矩
+        currentFlipTorque = Mathf.Lerp(currentFlipTorque, targetFlipTorque, Time.fixedDeltaTime * flipRecoverySpeed);
+
+        // 应用翻转力矩
+        if (Mathf.Abs(currentFlipTorque) > 0.1f)
+        {
+            // 根据车辆状态选择翻转轴
+            Vector3 flipAxis;
+
+            if (isUpsideDown)
+            {
+                // 倒置时，使用车辆的右方向作为翻转轴
+                flipAxis = transform.right;
+            }
+            else
+            {
+                // 侧翻时，使用车辆的前进方向作为翻转轴
+                flipAxis = transform.forward;
+            }
+
+            // 应用更强的力矩，并确保它能克服车辆的惯性
+            vehicleRigidbody.AddTorque(flipAxis * currentFlipTorque * Time.fixedDeltaTime, ForceMode.Impulse);
+        }
+
+        // 添加调试信息
+        if (Mathf.Abs(steeringInput) > 0.1f)
+        {
+            Debug.Log($"翻转状态: 向右侧翻={isFlippedToRight}, 向左侧翻={isFlippedToLeft}, " +
+                      $"原始输入={steeringInput}, 调整后输入={adjustedInput}, 力矩={currentFlipTorque}");
+        }
+    }
+
+    /// <summary>
+    /// 更新空中状态
+    /// </summary>
+    private void UpdateAirState()
+    {
+        // 检查车轮接触地面的情况
+        int groundedWheelsCount = CountGroundedWheels();
+        bool anyWheelGrounded = groundedWheelsCount > 0;
+
+        // 获取车辆垂直速度
+        Vector3 localVelocity = transform.InverseTransformDirection(vehicleRigidbody.linearVelocity);
+        float verticalSpeed = Mathf.Abs(localVelocity.y);
+
+        // 如果没有车轮接触地面，增加空中时间
+        if (!anyWheelGrounded)
+        {
+            airTime += Time.deltaTime;
+
+            // 只有当空中时间超过阈值且垂直速度足够大时，才判定为空中状态
+            if (airTime > airTimeThreshold && verticalSpeed > 1.5f)
+            {
+                if (!isInAir)
+                {
+                    Debug.Log($"车辆进入空中状态: 空中时间={airTime:F2}秒, 垂直速度={verticalSpeed:F2}m/s");
+                }
+                isInAir = true;
+                showAirControlPrompt = true;
+            }
+        }
+        else
+        {
+            // 如果有车轮接地，但不是全部车轮，且车辆正在经过减速带（垂直速度较小）
+            if (groundedWheelsCount < 4 && verticalSpeed < 3.0f)
+            {
+                // 减少空中时间，但不立即重置，以平滑过渡
+                airTime = Mathf.Max(0, airTime - Time.deltaTime * 2);
+
+                // 如果空中时间低于阈值的一半，不再判定为空中状态
+                if (airTime < airTimeThreshold * 0.5f && isInAir)
+                {
+                    Debug.Log($"车辆部分着地: 接地车轮数={groundedWheelsCount}, 空中时间={airTime:F2}秒");
+                    isInAir = false;
+                    showAirControlPrompt = false;
+                }
+            }
+            else
+            {
+                // 全部车轮接地或垂直速度较大，立即重置空中状态
+                if (isInAir)
+                {
+                    Debug.Log($"车辆完全着陆: 接地车轮数={groundedWheelsCount}");
+                }
+                airTime = 0f;
+                isInAir = false;
+                showAirControlPrompt = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 计算接地的车轮数量
+    /// </summary>
+    private int CountGroundedWheels()
+    {
+        int count = 0;
+
+        // 检查每个车轮是否接触地面
+        if (frontLeftWheel != null && IsWheelGrounded(frontLeftWheel)) count++;
+        if (frontRightWheel != null && IsWheelGrounded(frontRightWheel)) count++;
+        if (rearLeftWheel != null && IsWheelGrounded(rearLeftWheel)) count++;
+        if (rearRightWheel != null && IsWheelGrounded(rearRightWheel)) count++;
+
+        return count;
+    }
+
+    /// <summary>
+    /// 检查单个车轮是否真正接地
+    /// </summary>
+    private bool IsWheelGrounded(WheelCollider wheel)
+    {
+        if (wheel == null) return false;
+
+        // 首先检查WheelCollider的isGrounded属性
+        if (!wheel.isGrounded) return false;
+
+        // 获取车轮接触点信息
+        WheelHit hit;
+        if (!wheel.GetGroundHit(out hit)) return false;
+
+        // 检查接触力是否足够大（过滤轻微接触）
+        if (hit.force < 500) return false;
+
+        // 获取车轮世界位置
+        Vector3 wheelPosition;
+        Quaternion wheelRotation;
+        wheel.GetWorldPose(out wheelPosition, out wheelRotation);
+
+        // 从车轮向下发射射线，检查是否真正接触地面
+        RaycastHit rayHit;
+        float rayDistance = wheel.suspensionDistance + wheel.radius + 0.2f; // 稍微增加一点距离
+        if (Physics.Raycast(wheelPosition, -transform.up, out rayHit, rayDistance))
+        {
+            // 如果射线检测到的距离合理，认为车轮确实接地
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 检查是否有任何车轮接触地面
+    /// </summary>
+    private bool IsAnyWheelGrounded()
+    {
+        return CountGroundedWheels() > 0;
+    }
+
+    /// <summary>
+    /// 获取是否显示翻转提示
+    /// </summary>
+    public bool ShouldShowFlipPrompt()
+    {
+        return showFlipPrompt;
+    }
+
+    /// <summary>
+    /// 获取是否显示空中控制提示
+    /// </summary>
+    public bool ShouldShowAirControlPrompt()
+    {
+        return showAirControlPrompt;
+    }
+
+    /// <summary>
+    /// 获取是否在空中
+    /// </summary>
+    public bool IsInAir()
+    {
+        return isInAir;
+    }
+
+    /// <summary>
+    /// 在传送前调用
+    /// </summary>
+    public void PrepareForTeleport()
+    {
+        // 触发传送前事件
+        OnBeforeTeleport?.Invoke();
+
+        // 重置车辆状态
+        ResetVehicleState();
+    }
+
+    /// <summary>
+    /// 在传送后调用
+    /// </summary>
+    public void FinishTeleport()
+    {
+        // 重置车轮状态
+        ResetWheelState();
+
+        // 触发传送后事件
+        OnAfterTeleport?.Invoke();
+    }
+
+    /// <summary>
+    /// 重置车辆状态
+    /// </summary>
+    private void ResetVehicleState()
+    {
+        // 重置输入
+        throttleInput = 0f;
+        brakeInput = 0f;
+        steeringInput = 0f;
+        currentSteeringAngle = 0f;
+
+        // 重置物理状态
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// 重置车轮状态
+    /// </summary>
+    private void ResetWheelState()
+    {
+        // 重置所有车轮的状态
+        if (frontLeftWheel != null) ResetWheelCollider(frontLeftWheel);
+        if (frontRightWheel != null) ResetWheelCollider(frontRightWheel);
+        if (rearLeftWheel != null) ResetWheelCollider(rearLeftWheel);
+        if (rearRightWheel != null) ResetWheelCollider(rearRightWheel);
+
+        // 更新车轮模型
+        UpdateWheelModels();
+    }
+
+    /// <summary>
+    /// 重置单个车轮碰撞器状态
+    /// </summary>
+    private void ResetWheelCollider(WheelCollider wheel)
+    {
+        wheel.motorTorque = 0f;
+        wheel.brakeTorque = 0f;
+        wheel.steerAngle = 0f;
+    }
+
+    /// <summary>
+    /// 处理空中控制
+    /// </summary>
+    private void HandleAirControl()
+    {
+        // 如果不在空中，不处理空中控制
+        if (!isInAir) return;
+
+        // 获取输入
+        float pitchInput = throttleInput - brakeInput; // W/S控制俯仰
+        float rollInput = steeringInput; // A/D控制翻滚
+
+        // 输出调试信息
+        if (Mathf.Abs(rollInput) > 0.1f || Mathf.Abs(pitchInput) > 0.1f)
+        {
+            Debug.Log($"空中控制: 翻滚输入={rollInput}, 俯仰输入={pitchInput}, 是否在空中={isInAir}");
+        }
+
+        // 计算当前角速度
+        Vector3 angularVelocity = vehicleRigidbody.angularVelocity;
+        float currentRollSpeed = Vector3.Dot(angularVelocity, transform.forward);
+        float currentPitchSpeed = Vector3.Dot(angularVelocity, transform.right);
+
+        // 限制最大角速度，防止旋转过快
+        float maxAngularSpeed = 3.0f;
+        bool canApplyRoll = Mathf.Abs(currentRollSpeed) < maxAngularSpeed;
+        bool canApplyPitch = Mathf.Abs(currentPitchSpeed) < maxAngularSpeed;
+
+        // 应用俯仰控制（前后翻转）
+        if (Mathf.Abs(pitchInput) > 0.1f && canApplyPitch)
+        {
+            // 使用更强的力矩
+            Vector3 pitchTorque = transform.right * pitchInput * airPitchTorque;
+
+            // 使用Impulse模式以获得更强的瞬时效果
+            vehicleRigidbody.AddTorque(pitchTorque * Time.fixedDeltaTime, ForceMode.Impulse);
+
+            // 添加额外的向上力以保持高度
+            if (Mathf.Abs(pitchInput) > 0.5f)
+            {
+                vehicleRigidbody.AddForce(Vector3.up * 5000f * Time.fixedDeltaTime, ForceMode.Force);
+            }
+        }
+        else
+        {
+            // 当没有输入时，添加阻尼以减缓旋转
+            if (Mathf.Abs(currentPitchSpeed) > 0.5f)
+            {
+                // 计算反向阻尼力矩
+                Vector3 pitchDamping = -transform.right * Mathf.Sign(currentPitchSpeed) *
+                                      Mathf.Min(Mathf.Abs(currentPitchSpeed) * 0.5f, 1.0f) * airPitchTorque * 0.2f;
+
+                // 应用阻尼力矩
+                vehicleRigidbody.AddTorque(pitchDamping * Time.fixedDeltaTime, ForceMode.Force);
+            }
+        }
+
+        // 应用翻滚控制（左右翻转）
+        if (Mathf.Abs(rollInput) > 0.1f && canApplyRoll)
+        {
+            // 使用更强的力矩
+            Vector3 rollTorque = transform.forward * rollInput * airRollTorque;
+
+            // 使用Impulse模式以获得更强的瞬时效果
+            vehicleRigidbody.AddTorque(rollTorque * Time.fixedDeltaTime, ForceMode.Impulse);
+
+            // 添加额外的向上力以保持高度
+            if (Mathf.Abs(rollInput) > 0.5f)
+            {
+                vehicleRigidbody.AddForce(Vector3.up * 5000f * Time.fixedDeltaTime, ForceMode.Force);
+            }
+        }
+        else
+        {
+            // 当没有输入时，添加阻尼以减缓旋转
+            if (Mathf.Abs(currentRollSpeed) > 0.5f)
+            {
+                // 计算反向阻尼力矩
+                Vector3 rollDamping = -transform.forward * Mathf.Sign(currentRollSpeed) *
+                                     Mathf.Min(Mathf.Abs(currentRollSpeed) * 0.5f, 1.0f) * airRollTorque * 0.2f;
+
+                // 应用阻尼力矩
+                vehicleRigidbody.AddTorque(rollDamping * Time.fixedDeltaTime, ForceMode.Force);
+            }
+        }
+
+        // 添加空中姿态稳定（减弱稳定效果，让车辆更容易翻滚）
+        if (Mathf.Abs(rollInput) < 0.1f && Mathf.Abs(pitchInput) < 0.1f)
+        {
+            // 当没有输入时，尝试使车辆保持水平，但强度非常弱
+            Vector3 upDirection = transform.up;
+            Vector3 targetUp = Vector3.up;
+
+            // 计算当前朝上方向与目标朝上方向的差异
+            Vector3 stabilizeTorque = Vector3.Cross(upDirection, targetUp) * 3000f;
+
+            // 应用稳定力矩，但强度非常弱，几乎不会影响玩家的控制
+            vehicleRigidbody.AddTorque(stabilizeTorque * Time.fixedDeltaTime * 0.1f, ForceMode.Force);
         }
     }
 }

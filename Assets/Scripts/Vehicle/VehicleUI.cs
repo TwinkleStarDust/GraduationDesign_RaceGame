@@ -11,6 +11,9 @@ public class VehicleUI : MonoBehaviour
     [Tooltip("车辆控制器引用")]
     [SerializeField] private VehicleController vehicleController;
 
+    [Tooltip("相机控制器引用")]
+    [SerializeField] private VehicleCamera vehicleCamera;
+
     [Header("UI元素")]
     [Tooltip("速度文本")]
     [SerializeField] private TextMeshProUGUI speedText;
@@ -29,6 +32,22 @@ public class VehicleUI : MonoBehaviour
 
     [Tooltip("漂移指示器颜色")]
     [SerializeField] private Color driftColor = Color.red;
+
+    [Tooltip("相机模式文本")]
+    [SerializeField] private TextMeshProUGUI cameraViewModeText;
+
+    [Header("状态提示")]
+    [Tooltip("翻转提示面板")]
+    [SerializeField] private GameObject flipPromptPanel;
+
+    [Tooltip("翻转提示文本")]
+    [SerializeField] private TextMeshProUGUI flipPromptText;
+
+    [Tooltip("空中控制提示面板")]
+    [SerializeField] private GameObject airControlPromptPanel;
+
+    [Tooltip("空中控制提示文本")]
+    [SerializeField] private TextMeshProUGUI airControlPromptText;
 
     // 私有变量
     private Color normalColor;
@@ -49,6 +68,17 @@ public class VehicleUI : MonoBehaviour
             }
         }
 
+        // 如果没有指定相机控制器，尝试查找
+        if (vehicleCamera == null)
+        {
+            vehicleCamera = FindObjectOfType<VehicleCamera>();
+
+            if (vehicleCamera == null)
+            {
+                Debug.LogWarning("未找到相机控制器！");
+            }
+        }
+
         // 检查UI元素
         if (speedText == null)
         {
@@ -66,8 +96,33 @@ public class VehicleUI : MonoBehaviour
             normalColor = driftIndicator.color;
         }
 
+        // 设置提示文本
+        if (flipPromptText != null)
+        {
+            flipPromptText.text = "车辆侧翻！按 A/D 键翻转车辆";
+        }
+
+        if (airControlPromptText != null)
+        {
+            airControlPromptText.text = "空中控制：W/S - 前后翻转，A/D - 左右翻滚";
+        }
+
+        // 初始隐藏提示面板
+        if (flipPromptPanel != null)
+        {
+            flipPromptPanel.SetActive(false);
+        }
+
+        if (airControlPromptPanel != null)
+        {
+            airControlPromptPanel.SetActive(false);
+        }
+
         // 更新驱动类型文本
         UpdateDriveTypeText();
+
+        // 更新相机模式文本
+        UpdateCameraViewModeText();
     }
 
     /// <summary>
@@ -94,6 +149,50 @@ public class VehicleUI : MonoBehaviour
 
         // 更新漂移指示器
         UpdateDriftIndicator();
+
+        // 更新相机模式文本
+        UpdateCameraViewModeText();
+
+        // 更新状态提示
+        UpdateStatusPrompts();
+    }
+
+    /// <summary>
+    /// 更新状态提示
+    /// </summary>
+    private void UpdateStatusPrompts()
+    {
+        // 更新翻转提示
+        if (flipPromptPanel != null && vehicleController != null)
+        {
+            bool shouldShow = vehicleController.ShouldShowFlipPrompt();
+            flipPromptPanel.SetActive(shouldShow);
+
+            // 如果显示翻转提示，添加闪烁效果
+            if (shouldShow && flipPromptText != null)
+            {
+                float alpha = 0.5f + Mathf.PingPong(Time.time * 2f, 0.5f);
+                Color textColor = flipPromptText.color;
+                textColor.a = alpha;
+                flipPromptText.color = textColor;
+            }
+        }
+
+        // 更新空中控制提示
+        if (airControlPromptPanel != null && vehicleController != null)
+        {
+            bool shouldShow = vehicleController.ShouldShowAirControlPrompt();
+            airControlPromptPanel.SetActive(shouldShow);
+
+            // 如果显示空中控制提示，添加闪烁效果
+            if (shouldShow && airControlPromptText != null)
+            {
+                float alpha = 0.5f + Mathf.PingPong(Time.time * 2f, 0.5f);
+                Color textColor = airControlPromptText.color;
+                textColor.a = alpha;
+                airControlPromptText.color = textColor;
+            }
+        }
     }
 
     /// <summary>
@@ -147,6 +246,31 @@ public class VehicleUI : MonoBehaviour
             // 恢复正常颜色和大小
             driftIndicator.color = normalColor;
             driftIndicator.transform.localScale = Vector3.one;
+        }
+    }
+
+    /// <summary>
+    /// 更新相机模式文本
+    /// </summary>
+    private void UpdateCameraViewModeText()
+    {
+        if (cameraViewModeText == null || vehicleCamera == null) return;
+
+        // 获取当前相机模式
+        VehicleCamera.CameraViewMode viewMode = vehicleCamera.GetCurrentViewMode();
+
+        // 设置文本
+        switch (viewMode)
+        {
+            case VehicleCamera.CameraViewMode.ThirdPerson:
+                cameraViewModeText.text = "视角: 第三人称";
+                break;
+            case VehicleCamera.CameraViewMode.FirstPerson:
+                cameraViewModeText.text = "视角: 第一人称";
+                break;
+            case VehicleCamera.CameraViewMode.OrbitControl:
+                cameraViewModeText.text = "视角: 环绕视角";
+                break;
         }
     }
 }

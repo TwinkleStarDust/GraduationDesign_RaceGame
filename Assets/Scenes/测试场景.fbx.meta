@@ -3,7 +3,27 @@ guid: 4dcc23d222d8c9049ac6d4bd98e2112e
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Body
+    second: {fileID: 2800000, guid: 18e242760b4b34f408227a1a5cd804b9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PlaneBase Color - 2048px
+    second: {fileID: 2800000, guid: e08da9bcaab9928488efc6c7c1a1ea6c, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: PlaneBase Color - 512px
+    second: {fileID: 2800000, guid: 9a34bcca0e7a6de44865f0fe4b8f4413, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Wheel.001
+    second: {fileID: 2800000, guid: 20fbecb375c1ce844a8e70b35a5ca581, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
