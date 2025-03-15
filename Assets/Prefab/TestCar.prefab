@@ -848,8 +848,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7259452449999026734}
   - component: {fileID: 5397535041045710540}
-  - component: {fileID: 5936023447104367415}
-  - component: {fileID: 1924638609965937570}
   m_Layer: 0
   m_Name: TestCar
   m_TagString: Untagged
@@ -902,47 +900,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5936023447104367415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8797297864261080850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1675ee76aa14ac744b6fb896c66c5829, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxSpeed: 250
-  maxReverseSpeed: 30
-  acceleration: 10
-  brakeForce: 15
-  steeringSpeed: 70
-  maxSteeringAngle: 40
-  centerOfMassHeight: -0.5
-  frontLeftWheel: {fileID: 7065975461491294651}
-  frontRightWheel: {fileID: 1472331564846757446}
-  rearLeftWheel: {fileID: 7108015064429034299}
-  rearRightWheel: {fileID: 2173005270289037444}
-  frontLeftWheelTransform: {fileID: 8333161750133085924}
-  frontRightWheelTransform: {fileID: 3261116578463861149}
-  rearLeftWheelTransform: {fileID: 6322388977034192379}
-  rearRightWheelTransform: {fileID: 1363116287125062034}
-  engineSound: {fileID: 0}
-  minPitch: 0.5
-  maxPitch: 2
---- !u!114 &1924638609965937570
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8797297864261080850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bc50e0fc1964554189b910870549196, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vehicleController: {fileID: 5936023447104367415}
-  useKeyboardInput: 1
