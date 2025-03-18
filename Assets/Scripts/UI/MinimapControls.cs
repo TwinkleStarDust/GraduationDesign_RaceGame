@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-/// <summary>
+
 /// 小地图控制界面
 /// 处理小地图的缩放、旋转等交互
-/// </summary>
+
 public class MinimapControls : MonoBehaviour
 {
     [Tooltip("小地图管理器")]
@@ -94,9 +94,9 @@ public class MinimapControls : MonoBehaviour
         HandleKeyboardInput();
     }
 
-    /// <summary>
+
     /// 设置按钮点击事件
-    /// </summary>
+
     private void SetupButtons()
     {
         // 设置缩放按钮
@@ -129,9 +129,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 处理键盘输入
-    /// </summary>
+
     private void HandleKeyboardInput()
     {
         // 缩放控制
@@ -173,9 +173,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 放大小地图
-    /// </summary>
+
     public void ZoomIn()
     {
         if (minimapManager != null)
@@ -184,9 +184,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 缩小小地图
-    /// </summary>
+
     public void ZoomOut()
     {
         if (minimapManager != null)
@@ -195,9 +195,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 增加相机高度
-    /// </summary>
+
     public void IncreaseCameraHeight()
     {
         if (minimapManager != null)
@@ -213,9 +213,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 减小相机高度
-    /// </summary>
+
     public void DecreaseCameraHeight()
     {
         if (minimapManager != null)
@@ -231,9 +231,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 重置小地图设置
-    /// </summary>
+
     public void ResetMinimapSettings()
     {
         if (minimapManager != null)
@@ -243,9 +243,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 切换旋转模式
-    /// </summary>
+
     public void ToggleRotationMode()
     {
         if (minimapManager != null)
@@ -254,9 +254,9 @@ public class MinimapControls : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 切换全屏小地图模式
-    /// </summary>
+
     public void ToggleFullscreen()
     {
         if (normalMinimapPanel == null || fullscreenMinimapPanel == null) return;
@@ -267,9 +267,9 @@ public class MinimapControls : MonoBehaviour
         StartTransition();
     }
 
-    /// <summary>
+
     /// 开始过渡动画
-    /// </summary>
+
     private void StartTransition()
     {
         if (normalMinimapPanel == null || fullscreenMinimapPanel == null) return;
@@ -295,9 +295,9 @@ public class MinimapControls : MonoBehaviour
         isTransitioning = true;
     }
 
-    /// <summary>
+
     /// 更新过渡动画
-    /// </summary>
+
     private void UpdateTransition()
     {
         // 更新计时器

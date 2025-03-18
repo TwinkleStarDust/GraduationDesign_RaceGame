@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-/// <summary>
+
 /// 传送点按钮
 /// 处理传送按钮的UI效果
-/// </summary>
+
 public class TeleportButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Tooltip("按钮文本")]
@@ -30,9 +30,9 @@ public class TeleportButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     // 传送点引用
     private TeleportPoint teleportPoint;
 
-    /// <summary>
+    
     /// 初始化按钮
-    /// </summary>
+    
     public void Initialize(TeleportPoint point)
     {
         teleportPoint = point;
@@ -60,9 +60,9 @@ public class TeleportButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
 
-    /// <summary>
+    
     /// 鼠标进入按钮
-    /// </summary>
+    
     public void OnPointerEnter(PointerEventData eventData)
     {
         // 改变按钮颜色
@@ -78,9 +78,9 @@ public class TeleportButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
 
-    /// <summary>
+    
     /// 鼠标离开按钮
-    /// </summary>
+    
     public void OnPointerExit(PointerEventData eventData)
     {
         // 恢复按钮颜色

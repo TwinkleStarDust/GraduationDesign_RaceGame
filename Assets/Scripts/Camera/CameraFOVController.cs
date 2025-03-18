@@ -1,10 +1,10 @@
 using UnityEngine;
 using Vehicle;
 
-/// <summary>
+
 /// 相机FOV控制器
 /// 用于在氮气加速时增大FOV，增强加速感
-/// </summary>
+
 public class CameraFOVController : MonoBehaviour
 {
     [Header("FOV设置")]

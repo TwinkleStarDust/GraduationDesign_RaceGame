@@ -1,0 +1,8 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+Assets\UnityAssetsStore
+Assets/UnityAssetsStore
+D:\Unity\GraduationDesign_RaceGame\Assets\UnityAssetsStore
+D:/Unity/GraduationDesign_RaceGame/Assets/UnityAssetsStore
+**/UnityAssetsStore/**
+Assets/KennyAssets
