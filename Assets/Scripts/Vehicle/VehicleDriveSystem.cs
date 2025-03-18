@@ -92,6 +92,16 @@ namespace Vehicle
         [Tooltip("最小速度阈值")]
         [SerializeField] private float minSpeedThreshold = 1.0f;
 
+        [Header("制动系统")]
+        [Tooltip("地面制动力系数")]
+        [SerializeField] private float groundBrakeForce = 200f;
+
+        [Tooltip("空中制动力系数")]
+        [SerializeField] private float airBrakeForce = 20f;
+
+        [Tooltip("倒车速度系数")]
+        [SerializeField] private float reverseSpeedFactor = 0.5f;
+
         // 引用其他组件
         private VehiclePhysics vehiclePhysics;
         private Rigidbody vehicleRigidbody;
@@ -194,70 +204,75 @@ namespace Vehicle
             // 计算标准化速度 (0-1)
             normalizedSpeed = Mathf.Clamp01(currentSpeed / maxSpeed);
 
+            // 检查是否在空中
+            bool isInAir = vehiclePhysics.GetIsInAir();
+
             // 手刹逻辑
             if (isHandbrakeActive)
             {
-                float handBrakeTorque = 10000f;
-                vehiclePhysics.ApplyBrakeTorque(0f, handBrakeTorque);
+                // 只在地面上时应用手刹
+                if (!isInAir)
+                {
+                    float handBrakeTorque = 10000f;
+                    vehiclePhysics.ApplyBrakeTorque(0f, handBrakeTorque);
+                }
                 return;
             }
 
             // 处理油门输入 (W键)
             if (throttleInput > 0.1f)
             {
-                // 如果车辆正在向后移动，先刹车
+                // 如果车辆正在向后移动，先温和地刹车
                 if (forwardSpeed < -0.5f)
                 {
-                    float brakeTorque = brakeForce * 200;
+                    float brakeTorque = isInAir ? brakeForce * airBrakeForce : brakeForce * groundBrakeForce;
                     vehiclePhysics.ApplyBrakeTorque(brakeTorque, brakeTorque);
                     vehiclePhysics.ApplyMotorTorque(0f, 0f);
                 }
                 // 否则加速前进
                 else
                 {
-                    // 改进的引擎扭矩曲线，提高低速扭矩
+                    // 保持现有的加速逻辑
                     float torqueMultiplier = engineTorqueCurve.Evaluate(normalizedSpeed);
-
-                    // 计算基础扭矩
                     float motorTorque = acceleration * 120 * throttleInput * torqueMultiplier;
 
                     // 更新氮气状态
                     UpdateNitroState();
 
-                    // 如果氮气激活，平滑增加扭矩
                     if (isNitroActive && currentNitroAmount > 0)
                     {
-                        // 使用平滑过渡的氮气加速
+                        // 保持现有的氮气逻辑
                         float currentBoostFactor = 1.0f;
-                        if (normalizedSpeed < 0.8f) // 只在80%最大速度以下时提供全额氮气加速
+                        if (normalizedSpeed < 0.8f)
                         {
                             currentBoostFactor = Mathf.Lerp(1.0f, nitroBoostFactor,
                                 (1f - normalizedSpeed) * (currentNitroAmount / nitroCapacity));
                         }
-                        else // 高速时降低氮气效果，防止失控
+                        else
                         {
                             currentBoostFactor = Mathf.Lerp(1.0f, 1.1f,
                                 (currentNitroAmount / nitroCapacity));
                         }
 
-                        // 平滑应用氮气加速
                         motorTorque *= Mathf.Lerp(1.0f, currentBoostFactor, nitroSmoothness);
-
-                        // 消耗氮气
-                        float consumptionRate = nitroConsumptionRate * (1f + normalizedSpeed * 0.5f);
-                        currentNitroAmount = Mathf.Max(0, currentNitroAmount - consumptionRate * Time.fixedDeltaTime);
+                        currentNitroAmount = Mathf.Max(0, currentNitroAmount - nitroConsumptionRate * Time.fixedDeltaTime);
                     }
                     else
                     {
                         // 恢复氮气
-                        float recoveryMultiplier = (1f - normalizedSpeed * 0.5f); // 高速时降低恢复速度
+                        float recoveryMultiplier = (1f - normalizedSpeed * 0.5f);
                         currentNitroAmount = Mathf.Min(nitroCapacity,
                             currentNitroAmount + nitroRecoveryRate * recoveryMultiplier * Time.fixedDeltaTime);
                     }
 
-                    // 应用驱动力，确保在高速时不会产生过大的力
                     float speedLimitFactor = Mathf.Lerp(1.0f, 0.7f, normalizedSpeed * normalizedSpeed);
                     motorTorque *= speedLimitFactor;
+
+                    // 在空中时减小驱动力
+                    if (isInAir)
+                    {
+                        motorTorque *= 0.3f;
+                    }
 
                     vehiclePhysics.ApplyMotorTorque(
                         motorTorque * frontWheelDriveFactor,
@@ -269,25 +284,49 @@ namespace Vehicle
             // 处理刹车/倒车输入 (S键)
             else if (brakeInput > 0.1f)
             {
-                // 如果车辆正在向前移动，先刹车
-                if (forwardSpeed > 0.5f)
+                // 如果在空中
+                if (isInAir)
                 {
-                    float brakeTorque = brakeForce * 200;
-                    vehiclePhysics.ApplyBrakeTorque(brakeTorque, brakeTorque);
-                    vehiclePhysics.ApplyMotorTorque(0f, 0f);
+                    // 在空中时只施加很小的阻力，不完全抵消水平速度
+                    float airBrakeTorque = brakeForce * airBrakeForce * brakeInput;
+                    vehiclePhysics.ApplyBrakeTorque(airBrakeTorque * 0.5f, airBrakeTorque * 0.5f);
+
+                    // 在空中时允许小幅度的反向扭矩来调整姿态
+                    float airControlTorque = -acceleration * 30f * brakeInput;
+                    vehiclePhysics.ApplyMotorTorque(
+                        airControlTorque * frontWheelDriveFactor,
+                        airControlTorque * rearWheelDriveFactor
+                    );
                 }
-                // 如果车辆几乎停止或向后移动，则倒车
+                // 在地面上
                 else
                 {
-                    // 应用倒车驱动力
-                    float motorTorque = -acceleration * 100 * brakeInput;
+                    // 如果车辆正在向前移动，应用制动力
+                    if (forwardSpeed > 0.5f)
+                    {
+                        float brakeTorque = brakeForce * groundBrakeForce * brakeInput;
+                        vehiclePhysics.ApplyBrakeTorque(brakeTorque, brakeTorque);
+                        vehiclePhysics.ApplyMotorTorque(0f, 0f);
+                    }
+                    // 如果车辆几乎停止或向后移动，则倒车
+                    else
+                    {
+                        // 应用倒车驱动力（使用reverseSpeedFactor来控制倒车速度）
+                        float reverseMotorTorque = -acceleration * 100f * brakeInput * reverseSpeedFactor;
 
-                    // 应用驱动力
-                    vehiclePhysics.ApplyMotorTorque(
-                        motorTorque * frontWheelDriveFactor,
-                        motorTorque * rearWheelDriveFactor
-                    );
-                    vehiclePhysics.ApplyBrakeTorque(0f, 0f);
+                        // 如果速度已经接近最大倒车速度，逐渐减小驱动力
+                        float reverseSpeedRatio = Mathf.Abs(forwardSpeed) / (maxReverseSpeed * KMH_TO_MS);
+                        if (reverseSpeedRatio > 0.8f)
+                        {
+                            reverseMotorTorque *= (1f - (reverseSpeedRatio - 0.8f) * 5f);
+                        }
+
+                        vehiclePhysics.ApplyMotorTorque(
+                            reverseMotorTorque * frontWheelDriveFactor,
+                            reverseMotorTorque * rearWheelDriveFactor
+                        );
+                        vehiclePhysics.ApplyBrakeTorque(0f, 0f);
+                    }
                 }
             }
             // 没有输入时（滑行状态）
@@ -296,38 +335,49 @@ namespace Vehicle
                 // 计算滑行阻力（基于速度的非线性阻力）
                 float speedFactor = Mathf.Clamp01(currentSpeed / 60.0f);
 
-                // 极低速时（几乎停止）
-                if (Mathf.Abs(forwardSpeed) < 0.5f)
+                // 在空中时
+                if (isInAir)
                 {
-                    // 应用极小的制动力防止溜车
-                    float stopBrakeTorque = 0.5f; // 显著降低停车制动力
-                    vehiclePhysics.ApplyBrakeTorque(stopBrakeTorque, stopBrakeTorque);
+                    // 在空中时只施加极小的阻力
+                    float airDrag = speedFactor * 0.5f;
+                    vehiclePhysics.ApplyBrakeTorque(airDrag, airDrag);
                     vehiclePhysics.ApplyMotorTorque(0f, 0f);
                 }
-                // 正常滑行
+                // 在地面上时
                 else
                 {
-                    // 使用非线性曲线计算阻力，使其更接近真实物理
-                    float dragFactor = speedFactor * speedFactor; // 二次方曲线使高速阻力更明显
-                    float naturalDrag = dragFactor * 1.5f; // 显著降低基础阻力
-
-                    // 应用极小的制动力模拟自然阻力
-                    vehiclePhysics.ApplyBrakeTorque(naturalDrag, naturalDrag);
-
-                    // 在高速滑行时提供小的补偿扭矩，使减速更自然
-                    if (currentSpeed > 30f && !vehiclePhysics.GetIsInAir())
+                    // 极低速时（几乎停止）
+                    if (Mathf.Abs(forwardSpeed) < 0.5f)
                     {
-                        float compensationFactor = Mathf.Lerp(0f, 0.15f, 1f - dragFactor);
-                        float compensationTorque = acceleration * compensationFactor;
-
-                        vehiclePhysics.ApplyMotorTorque(
-                            compensationTorque * frontWheelDriveFactor,
-                            compensationTorque * rearWheelDriveFactor
-                        );
+                        // 应用极小的制动力防止溜车
+                        float stopBrakeTorque = 0.5f;
+                        vehiclePhysics.ApplyBrakeTorque(stopBrakeTorque, stopBrakeTorque);
+                        vehiclePhysics.ApplyMotorTorque(0f, 0f);
                     }
+                    // 正常滑行
                     else
                     {
-                        vehiclePhysics.ApplyMotorTorque(0f, 0f);
+                        // 使用非线性曲线计算阻力
+                        float dragFactor = speedFactor * speedFactor;
+                        float naturalDrag = dragFactor * 1.5f;
+
+                        vehiclePhysics.ApplyBrakeTorque(naturalDrag, naturalDrag);
+
+                        // 在高速滑行时提供小的补偿扭矩
+                        if (currentSpeed > 30f)
+                        {
+                            float compensationFactor = Mathf.Lerp(0f, 0.15f, 1f - dragFactor);
+                            float compensationTorque = acceleration * compensationFactor;
+
+                            vehiclePhysics.ApplyMotorTorque(
+                                compensationTorque * frontWheelDriveFactor,
+                                compensationTorque * rearWheelDriveFactor
+                            );
+                        }
+                        else
+                        {
+                            vehiclePhysics.ApplyMotorTorque(0f, 0f);
+                        }
                     }
                 }
             }

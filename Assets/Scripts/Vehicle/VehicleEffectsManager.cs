@@ -53,6 +53,14 @@ namespace Vehicle
         [SerializeField] private float minDriftAngle = 10f;           // 最小漂移角度
         [SerializeField] private float minDriftSpeed = 20f;           // 最小漂移速度
 
+        [Header("粒子方向设置")]
+        [Tooltip("粒子向上倾斜的最小角度")]
+        [SerializeField] private float minUpwardAngle = 5f;            // 最小上倾角度
+        [Tooltip("粒子向上倾斜的最大角度")]
+        [SerializeField] private float maxUpwardAngle = 30f;           // 最大上倾角度
+        [Tooltip("粒子与地面的偏移距离")]
+        [SerializeField] private float groundOffset = 0.1f;            // 粒子与地面的偏移，防止穿透
+
         // 缓存已实例化的粒子系统
         private Dictionary<string, List<ParticleSystem>> activeParticleSystems = new Dictionary<string, List<ParticleSystem>>();
 
@@ -338,8 +346,22 @@ namespace Vehicle
 
                 if (wheelShouldSmoke)
                 {
-                    // 更新粒子系统位置 - 稍微降低位置确保效果更贴近地面
-                    system.transform.position = wheel.transform.position - new Vector3(0, wheel.radius * 0.7f, 0);
+                    // 更新粒子系统位置 - 确保效果位于地面之上
+                    Vector3 wheelPos = wheel.transform.position;
+                    float groundDist = wheel.radius;
+
+                    // 使用射线检测实际地面位置，更精确地确定粒子生成高度
+                    RaycastHit groundHit;
+                    if (Physics.Raycast(wheelPos, Vector3.down, out groundHit, wheel.radius * 2f))
+                    {
+                        // 将粒子系统放置在检测到的地面位置上方
+                        system.transform.position = groundHit.point + Vector3.up * groundOffset;
+                    }
+                    else
+                    {
+                        // 如果没有检测到地面，使用轮子位置计算
+                        system.transform.position = wheelPos - new Vector3(0, wheel.radius * 0.8f, 0) + Vector3.up * groundOffset;
+                    }
 
                     // 计算车轮滑动的方向向量，用于调整粒子系统的朝向
                     Vector3 slipDirection = new Vector3(hit.sidewaysSlip, 0, hit.forwardSlip).normalized;
@@ -350,8 +372,9 @@ namespace Vehicle
                         // 将粒子系统旋转至滑动方向，使烟雾朝向滑动方向喷射
                         system.transform.rotation = Quaternion.LookRotation(slipDirection, Vector3.up);
 
-                        // 稍微倾斜向上约20度，更符合实际效果
-                        system.transform.rotation *= Quaternion.Euler(20f, 0, 0);
+                        // 根据漂移强度动态调整向上倾斜角度
+                        float upAngle = Mathf.Lerp(minUpwardAngle, maxUpwardAngle, currentIntensity);
+                        system.transform.rotation *= Quaternion.Euler(upAngle, 0, 0);
                     }
 
                     // 调整粒子发射速率和其他参数
@@ -359,11 +382,25 @@ namespace Vehicle
                     var shape = system.shape;
                     var main = system.main;
 
+                    // 设置粒子形状为锥形
+                    shape.shapeType = ParticleSystemShapeType.Cone;
+
                     // 调整粒子形状为圆锥，角度随漂移强度变化
                     shape.angle = Mathf.Lerp(10f, 25f, currentIntensity * 0.5f);
 
                     // 调整粒子速度基于漂移强度和滑动量
                     main.startSpeed = Mathf.Lerp(2f, 6f, slipAmount * currentIntensity);
+
+                    // 启用粒子碰撞以避免穿透地面
+                    var collision = system.collision;
+                    if (!collision.enabled)
+                    {
+                        collision.enabled = true;
+                        collision.type = ParticleSystemCollisionType.World;
+                        collision.mode = ParticleSystemCollisionMode.Collision3D;
+                        collision.bounce = 0.1f; // 低反弹系数
+                        collision.lifetimeLoss = 0.5f; // 碰撞后生命值损失
+                    }
 
                     // 调整粒子发射速率，基于当前强度的平方（使淡入淡出更加明显）
                     emission.rateOverTimeMultiplier = slipAmount * currentIntensity * currentIntensity * 25f;
