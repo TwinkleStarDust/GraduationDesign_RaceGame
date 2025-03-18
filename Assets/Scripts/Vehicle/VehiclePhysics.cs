@@ -677,4 +677,36 @@ public class VehiclePhysics : MonoBehaviour
     {
         return isUpsideDown;
     }
+
+    /// <summary>
+    /// 获取前左轮碰撞器
+    /// </summary>
+    public WheelCollider GetFrontLeftWheel()
+    {
+        return frontLeftWheel;
+    }
+
+    /// <summary>
+    /// 获取前右轮碰撞器
+    /// </summary>
+    public WheelCollider GetFrontRightWheel()
+    {
+        return frontRightWheel;
+    }
+
+    /// <summary>
+    /// 获取后左轮碰撞器
+    /// </summary>
+    public WheelCollider GetRearLeftWheel()
+    {
+        return rearLeftWheel;
+    }
+
+    /// <summary>
+    /// 获取后右轮碰撞器
+    /// </summary>
+    public WheelCollider GetRearRightWheel()
+    {
+        return rearRightWheel;
+    }
 }

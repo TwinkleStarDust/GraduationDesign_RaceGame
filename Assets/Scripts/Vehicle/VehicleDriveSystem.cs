@@ -531,7 +531,7 @@ namespace Vehicle
         }
 
         /// <summary>
-        /// 获取油门输入
+        /// 获取当前油门输入值
         /// </summary>
         public float GetThrottleInput()
         {
@@ -539,7 +539,7 @@ namespace Vehicle
         }
 
         /// <summary>
-        /// 获取刹车输入
+        /// 获取当前刹车输入值
         /// </summary>
         public float GetBrakeInput()
         {

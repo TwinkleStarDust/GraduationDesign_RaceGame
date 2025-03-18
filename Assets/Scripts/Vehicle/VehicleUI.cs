@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 namespace Vehicle
 {
@@ -68,6 +69,17 @@ namespace Vehicle
         /// </summary>
         private void Start()
         {
+            StartCoroutine(InitializeComponents());
+        }
+
+        /// <summary>
+        /// 延迟初始化组件
+        /// </summary>
+        private IEnumerator InitializeComponents()
+        {
+            // 等待一帧，确保其他组件都已初始化
+            yield return null;
+
             // 如果没有指定车辆控制器，尝试查找
             if (vehicleController == null)
             {
@@ -75,7 +87,8 @@ namespace Vehicle
 
                 if (vehicleController == null)
                 {
-                    Debug.LogError("未找到车辆控制器！");
+                    Debug.LogError("未找到车辆控制器！请确保场景中存在带有VehicleController组件的车辆。");
+                    yield break;
                 }
             }
 

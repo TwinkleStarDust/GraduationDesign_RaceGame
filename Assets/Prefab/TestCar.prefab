@@ -900,3 +900,33 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2589631759438456789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132149155446097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 这里需要替换为VehicleEffectsManager的GUID, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehicleController: {fileID: 0}
+  vehicleDriveSystem: {fileID: 0}
+  vehiclePhysics: {fileID: 0}
+  wheelSmokePrefabs: []
+  minSpeedForWheelSmoke: 10
+  minSlipForWheelSmoke: 0.2
+  wheelSmokeIntensityMultiplier: 1
+  nitroEffectPrefabs: []
+  nitroLights: []
+  nitroLightIntensity: 2
+  brakeEffectPrefabs: []
+  minSpeedForBrakeEffect: 40
+  brakeEffectThreshold: 0.7
+  exhaustEffectPrefabs: []
+  exhaustRateIdle: 5
+  exhaustRateMax: 30
+  collisionEffectPrefab: {fileID: 0}
+  minCollisionForce: 5
