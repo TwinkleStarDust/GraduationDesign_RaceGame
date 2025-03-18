@@ -82,6 +82,16 @@ namespace Vehicle
         [Tooltip("氮气加速平滑度")]
         [SerializeField] private float nitroSmoothness = 0.5f;
 
+        [Header("惯性设置")]
+        [Tooltip("发动机制动力")]
+        [SerializeField] private float engineBrakingForce = 5.0f;
+
+        [Tooltip("滑行阻力")]
+        [SerializeField] private float coastingDrag = 2.0f;
+
+        [Tooltip("最小速度阈值")]
+        [SerializeField] private float minSpeedThreshold = 1.0f;
+
         // 引用其他组件
         private VehiclePhysics vehiclePhysics;
         private Rigidbody vehicleRigidbody;
@@ -280,39 +290,40 @@ namespace Vehicle
                     vehiclePhysics.ApplyBrakeTorque(0f, 0f);
                 }
             }
-            // 没有输入时，逐渐减速而不是突然制动
+            // 没有输入时（滑行状态）
             else
             {
-                // 只在几乎停止时应用很小的制动力防止溜车
+                // 计算滑行阻力（基于速度的非线性阻力）
+                float speedFactor = Mathf.Clamp01(currentSpeed / 60.0f);
+
+                // 极低速时（几乎停止）
                 if (Mathf.Abs(forwardSpeed) < 0.5f)
                 {
-                    float brakeTorque = 15f;  // 进一步降低停车时的制动力，从20f降到15f
-                    vehiclePhysics.ApplyBrakeTorque(brakeTorque, brakeTorque);
+                    // 应用极小的制动力防止溜车
+                    float stopBrakeTorque = 0.5f; // 显著降低停车制动力
+                    vehiclePhysics.ApplyBrakeTorque(stopBrakeTorque, stopBrakeTorque);
                     vehiclePhysics.ApplyMotorTorque(0f, 0f);
                 }
-                // 高速滑行时应用极小的制动力模拟发动机阻力和空气阻力
+                // 正常滑行
                 else
                 {
-                    // 最小化滑行时的制动力，让车辆保持速度更久
-                    float speedFactor = Mathf.Clamp01(currentSpeed / 60.0f);
-                    float brakeTorque = Mathf.Lerp(2f, 10f, speedFactor); // 进一步降低制动力
-                    vehiclePhysics.ApplyBrakeTorque(brakeTorque, brakeTorque);
+                    // 使用非线性曲线计算阻力，使其更接近真实物理
+                    float dragFactor = speedFactor * speedFactor; // 二次方曲线使高速阻力更明显
+                    float naturalDrag = dragFactor * 1.5f; // 显著降低基础阻力
 
-                    // 在高速时添加一个小的正向扭矩，抵消部分阻力
-                    if (currentSpeed > 30f && vehiclePhysics != null && !vehiclePhysics.GetIsInAir())
+                    // 应用极小的制动力模拟自然阻力
+                    vehiclePhysics.ApplyBrakeTorque(naturalDrag, naturalDrag);
+
+                    // 在高速滑行时提供小的补偿扭矩，使减速更自然
+                    if (currentSpeed > 30f && !vehiclePhysics.GetIsInAir())
                     {
-                        float compensationTorque = Mathf.Lerp(0f, 30f, speedFactor - 0.5f);
-                        if (compensationTorque > 0)
-                        {
-                            vehiclePhysics.ApplyMotorTorque(
-                                compensationTorque * frontWheelDriveFactor,
-                                compensationTorque * rearWheelDriveFactor
-                            );
-                        }
-                        else
-                        {
-                            vehiclePhysics.ApplyMotorTorque(0f, 0f);
-                        }
+                        float compensationFactor = Mathf.Lerp(0f, 0.15f, 1f - dragFactor);
+                        float compensationTorque = acceleration * compensationFactor;
+
+                        vehiclePhysics.ApplyMotorTorque(
+                            compensationTorque * frontWheelDriveFactor,
+                            compensationTorque * rearWheelDriveFactor
+                        );
                     }
                     else
                     {
@@ -329,58 +340,52 @@ namespace Vehicle
         {
             if (vehiclePhysics == null) return;
 
-            // 确保在车辆几乎停止时不应用转向
-            if (Mathf.Abs(currentSpeed) < 2.0f)
-            {
-                // 逐渐将转向角度归零
-                currentSteeringAngle = Mathf.Lerp(currentSteeringAngle, 0f, Time.fixedDeltaTime * steeringSpeed * 2.0f);
+            // 计算速度相关因子
+            float speedFactor = Mathf.Clamp01(currentSpeed / 70.0f);
 
-                // 应用转向角度到前轮
-                vehiclePhysics.SetSteeringAngle(currentSteeringAngle, currentSteeringAngle);
-                return;
-            }
+            // 低速时允许更大的转向角度，但仍然保持一定的控制
+            float lowSpeedFactor = Mathf.Clamp01(currentSpeed / 10.0f);
+            float steeringFactor = Mathf.Lerp(1.2f, 0.3f, speedFactor * speedFactor);
 
-            // 改进的速度因子计算，使高速转向更加平滑
-            float speedFactor = Mathf.Clamp01(currentSpeed / 70.0f); // 提高参考速度从50km/h到70km/h
-
-            // 更加平滑的转向因子曲线，高速时转向更温和
-            float steeringFactor = Mathf.Lerp(1.0f, 0.3f, speedFactor * speedFactor); // 使用平方函数让高速时转向更加柔和
-
-            // 计算目标转向角度，添加平滑过渡
+            // 计算目标转向角度
             float targetSteeringAngle = steeringInput * maxSteeringAngle * steeringFactor;
 
-            // 高速时转向响应更缓慢，防止突然转向导致侧翻
-            float turnSpeed = Mathf.Lerp(steeringSpeed, steeringSpeed * 0.6f, speedFactor);
+            // 根据速度调整转向响应速度
+            float turnSpeed = Mathf.Lerp(steeringSpeed * 1.2f, steeringSpeed * 0.6f, speedFactor);
 
-            // 平滑转向，高速时响应更慢
+            // 低速时保持一定的转向能力，但避免原地打转
+            if (Mathf.Abs(currentSpeed) < 2.0f)
+            {
+                // 降低低速转向的响应度，但不完全禁用
+                turnSpeed *= 0.5f;
+                targetSteeringAngle *= 0.7f;
+            }
+
+            // 平滑转向角度变化
             currentSteeringAngle = Mathf.Lerp(
                 currentSteeringAngle,
                 targetSteeringAngle,
                 Time.fixedDeltaTime * turnSpeed
             );
 
-            // 如果启用了Ackerman转向，则计算内外轮转向角度差异
+            // Ackerman转向逻辑
             if (useAckermanSteering && Mathf.Abs(currentSteeringAngle) > 3.0f)
             {
-                // 计算Ackerman效应下的内外轮转向角度
                 float innerWheelAngle = currentSteeringAngle;
-
-                // 调整外轮角度计算公式，使转向更平滑
                 float outerWheelAngle = currentSteeringAngle * (1f - ackermanCoefficient * Mathf.Abs(currentSteeringAngle) / maxSteeringAngle);
 
-                // 根据转向方向确定哪个是内轮，哪个是外轮
-                if (currentSteeringAngle > 0) // 向右转
+                // 应用转向角度
+                if (currentSteeringAngle > 0)
                 {
                     vehiclePhysics.SetSteeringAngle(innerWheelAngle, outerWheelAngle);
                 }
-                else // 向左转
+                else
                 {
                     vehiclePhysics.SetSteeringAngle(outerWheelAngle, innerWheelAngle);
                 }
             }
             else
             {
-                // 不使用Ackerman转向时，两轮角度相同
                 vehiclePhysics.SetSteeringAngle(currentSteeringAngle, currentSteeringAngle);
             }
         }
