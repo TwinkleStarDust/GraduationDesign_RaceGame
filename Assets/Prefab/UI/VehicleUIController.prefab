@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &228897638471538411
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1911767100549009286}
+  - component: {fileID: 7164856693733445499}
+  m_Layer: 5
+  m_Name: VehicleUIController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1911767100549009286
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228897638471538411}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 422.9406, y: 227.39932, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7164856693733445499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228897638471538411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00d8c49e5e455af4eb3ceed18b999274, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehicleController: {fileID: 0}
+  vehicleCamera: {fileID: 0}
+  speedText: {fileID: 0}
+  speedometerFill: {fileID: 0}
+  maxSpeedForGauge: 200
+  driveTypeText: {fileID: 0}
+  driftIndicator: {fileID: 0}
+  driftColor: {r: 1, g: 0, b: 0, a: 1}
+  cameraViewModeText: {fileID: 0}
+  nitroFill: {fileID: 0}
+  nitroActiveIndicator: {fileID: 0}
+  nitroActiveColor: {r: 0, g: 0.8, b: 1, a: 1}
+  flipPromptPanel: {fileID: 0}
+  flipPromptText: {fileID: 0}
+  airControlPromptPanel: {fileID: 0}
+  airControlPromptText: {fileID: 0}

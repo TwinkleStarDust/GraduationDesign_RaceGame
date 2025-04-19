@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// <summary>
+
 /// 传送点
 /// 定义传送点的位置和属性
-/// </summary>
+
 public class TeleportPoint : MonoBehaviour
 {
     [Tooltip("传送点名称")]
@@ -24,29 +24,29 @@ public class TeleportPoint : MonoBehaviour
     [Tooltip("可视化效果大小")]
     [SerializeField] private float visualizerSize = 3f;
 
-    /// <summary>
+    
     /// 获取传送点名称
-    /// </summary>
+    
     public string PointName => pointName;
 
-    /// <summary>
+    
     /// 获取传送点描述
-    /// </summary>
+    
     public string Description => description;
 
-    /// <summary>
+    
     /// 获取传送点图标
-    /// </summary>
+    
     public Sprite Icon => icon;
 
-    /// <summary>
+    
     /// 获取传送点颜色
-    /// </summary>
+    
     public Color PointColor => pointColor;
 
-    /// <summary>
+    
     /// 在编辑器中绘制可视化效果
-    /// </summary>
+    
     private void OnDrawGizmos()
     {
         if (!showVisualizer) return;
@@ -69,9 +69,9 @@ public class TeleportPoint : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    /// <summary>
+    
     /// 在编辑器中重命名游戏对象以匹配传送点名称
-    /// </summary>
+    
     private void OnValidate()
     {
         if (!string.IsNullOrEmpty(pointName) && gameObject.name != pointName)

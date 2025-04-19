@@ -1,9 +1,9 @@
 using UnityEngine;
 
-/// <summary>
+
 /// 传送输入处理器
 /// 处理传送系统的键盘输入
-/// </summary>
+
 public class TeleportInputHandler : MonoBehaviour
 {
     [Tooltip("传送管理器引用")]

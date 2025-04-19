@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
+
 /// 淡入淡出效果面板
 /// 用于传送时的过渡效果
-/// </summary>
+
 public class FadePanel : MonoBehaviour
 {
     [Tooltip("淡入淡出效果的图像")]
@@ -50,9 +50,9 @@ public class FadePanel : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    /// <summary>
+    
     /// 设置淡入淡出颜色
-    /// </summary>
+    
     public void SetFadeColor(Color color)
     {
         fadeColor = color;
@@ -62,9 +62,9 @@ public class FadePanel : MonoBehaviour
         }
     }
 
-    /// <summary>
+    
     /// 设置透明度
-    /// </summary>
+    
     public void SetAlpha(float alpha)
     {
         if (canvasGroup != null)
@@ -73,18 +73,18 @@ public class FadePanel : MonoBehaviour
         }
     }
 
-    /// <summary>
+    
     /// 立即淡入
-    /// </summary>
+    
     public void FadeIn()
     {
         gameObject.SetActive(true);
         SetAlpha(1f);
     }
 
-    /// <summary>
+    
     /// 立即淡出
-    /// </summary>
+    
     public void FadeOut()
     {
         SetAlpha(0f);

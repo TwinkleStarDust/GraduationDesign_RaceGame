@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Vehicle;
 
-/// <summary>
+
 /// 小地图管理器
 /// 负责控制小地图的显示和功能
-/// </summary>
+
 public class MinimapManager : MonoBehaviour
 {
     [Header("小地图设置")]
@@ -107,9 +107,9 @@ public class MinimapManager : MonoBehaviour
         UpdateMinimapMarkers();
     }
 
-    /// <summary>
-    /// 初始化小地图相机
-    /// </summary>
+
+    /// 初始化小地图相机s
+
     private void InitializeMinimapCamera()
     {
         if (minimapCamera == null)
@@ -144,9 +144,9 @@ public class MinimapManager : MonoBehaviour
         Debug.Log($"MinimapManager: 相机设置完成，正交大小: {minimapCamera.orthographicSize}, 高度: {cameraHeight}");
     }
 
-    /// <summary>
+
     /// 初始化小地图UI
-    /// </summary>
+
     private void InitializeMinimapUI()
     {
         if (minimapImage == null)
@@ -173,9 +173,9 @@ public class MinimapManager : MonoBehaviour
         minimapImage.rectTransform.sizeDelta = minimapSize;
     }
 
-    /// <summary>
+
     /// 寻找目标车辆
-    /// </summary>
+
     private void FindTargetVehicle()
     {
         // 查找玩家控制的车辆
@@ -190,9 +190,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 寻找检查点
-    /// </summary>
+
     private void FindCheckpoints()
     {
         // 查找场景中的所有检查点
@@ -205,9 +205,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 创建检查点标记
-    /// </summary>
+
     private void CreateCheckpointMarker(Transform checkpoint)
     {
         if (checkpointMarkerPrefab == null) return;
@@ -221,9 +221,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 添加其他玩家标记
-    /// </summary>
+
     public void AddOtherPlayerMarker(Transform otherPlayer)
     {
         if (otherPlayerMarkerPrefab == null || otherPlayer == null) return;
@@ -240,9 +240,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 移除其他玩家标记
-    /// </summary>
+
     public void RemoveOtherPlayerMarker(Transform otherPlayer)
     {
         if (otherPlayerMarkers.ContainsKey(otherPlayer))
@@ -252,9 +252,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 更新相机设置
-    /// </summary>
+
     private void UpdateCameraSettings()
     {
         if (minimapCamera == null) return;
@@ -274,9 +274,9 @@ public class MinimapManager : MonoBehaviour
         Debug.Log($"MinimapManager: 更新相机设置，正交大小: {minimapCamera.orthographicSize}, 高度: {cameraHeight}");
     }
 
-    /// <summary>
+
     /// 更新小地图相机
-    /// </summary>
+
     private void UpdateMinimapCamera()
     {
         if (minimapCamera == null || targetVehicle == null) return;
@@ -311,9 +311,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 更新小地图标记
-    /// </summary>
+
     private void UpdateMinimapMarkers()
     {
         // 更新玩家标记位置（始终在中心）
@@ -354,9 +354,9 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 世界坐标转换为小地图坐标
-    /// </summary>
+
     private Vector2 WorldToMinimapPosition(Vector3 worldPosition)
     {
         if (minimapCamera == null || targetVehicle == null) return Vector2.zero;
@@ -393,9 +393,9 @@ public class MinimapManager : MonoBehaviour
         return new Vector2(x, y);
     }
 
-    /// <summary>
+
     /// 设置小地图缩放
-    /// </summary>
+
     public void SetMinimapZoom(float zoom)
     {
         minimapZoom = Mathf.Clamp(zoom, minZoom, maxZoom);
@@ -407,25 +407,25 @@ public class MinimapManager : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 放大小地图
-    /// </summary>
+
     public void ZoomIn()
     {
         SetMinimapZoom(minimapZoom - 10f);
     }
 
-    /// <summary>
+
     /// 缩小小地图
-    /// </summary>
+
     public void ZoomOut()
     {
         SetMinimapZoom(minimapZoom + 10f);
     }
 
-    /// <summary>
+
     /// 切换小地图旋转模式
-    /// </summary>
+
     public void ToggleRotationMode()
     {
         if (rotationMode == MinimapRotationMode.Fixed)
@@ -434,18 +434,18 @@ public class MinimapManager : MonoBehaviour
             rotationMode = MinimapRotationMode.Fixed;
     }
 
-    /// <summary>
+
     /// 设置相机高度
-    /// </summary>
+
     public void SetCameraHeight(float height)
     {
         cameraHeight = Mathf.Max(10f, height);
         UpdateCameraSettings();
     }
 
-    /// <summary>
+
     /// 重置小地图设置
-    /// </summary>
+
     public void ResetMinimapSettings()
     {
         minimapZoom = 50f;

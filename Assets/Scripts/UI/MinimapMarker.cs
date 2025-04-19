@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
+
 /// 小地图标记
 /// 用于控制小地图上的标记点显示
-/// </summary>
+
 public class MinimapMarker : MonoBehaviour
 {
     public enum MarkerType
@@ -91,9 +91,9 @@ public class MinimapMarker : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 设置标记颜色
-    /// </summary>
+
     private void SetMarkerColor()
     {
         if (markerImage == null) return;
@@ -121,9 +121,9 @@ public class MinimapMarker : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 更新脉冲效果
-    /// </summary>
+
     private void UpdatePulseEffect()
     {
         if (rectTransform == null) return;
@@ -139,18 +139,18 @@ public class MinimapMarker : MonoBehaviour
         rectTransform.localScale = new Vector3(pulseSize, pulseSize, 1f);
     }
 
-    /// <summary>
+
     /// 设置标记类型
-    /// </summary>
+
     public void SetMarkerType(MarkerType type)
     {
         markerType = type;
         SetMarkerColor();
     }
 
-    /// <summary>
+
     /// 设置标记尺寸
-    /// </summary>
+
     public void SetMarkerSize(Vector2 size)
     {
         markerSize = size;
@@ -161,9 +161,9 @@ public class MinimapMarker : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 设置脉冲效果
-    /// </summary>
+
     public void SetPulseEffect(bool enable)
     {
         enablePulse = enable;
@@ -174,9 +174,9 @@ public class MinimapMarker : MonoBehaviour
         }
     }
 
-    /// <summary>
+
     /// 高亮标记
-    /// </summary>
+
     public void Highlight(bool highlight)
     {
         if (markerImage == null) return;
