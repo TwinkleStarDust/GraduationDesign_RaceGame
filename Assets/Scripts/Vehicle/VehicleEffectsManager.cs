@@ -3,14 +3,13 @@ using System.Collections.Generic;
 
 namespace Vehicle
 {
-     
+
     /// 车辆特效管理器
     /// 负责控制车辆的所有粒子效果
-     
+
     public class VehicleEffectsManager : MonoBehaviour
     {
         [Header("组件引用")]
-        [SerializeField] private VehicleController vehicleController;
         [SerializeField] private VehicleDriveSystem vehicleDriveSystem;
         [SerializeField] private VehiclePhysics vehiclePhysics;
         [SerializeField] private Rigidbody vehicleRigidbody;
@@ -80,9 +79,6 @@ namespace Vehicle
         private void Awake()
         {
             // 获取组件引用
-            if (vehicleController == null)
-                vehicleController = GetComponent<VehicleController>();
-
             if (vehicleDriveSystem == null)
                 vehicleDriveSystem = GetComponent<VehicleDriveSystem>();
 
@@ -93,13 +89,6 @@ namespace Vehicle
                 vehicleRigidbody = GetComponent<Rigidbody>();
 
             // 检查必要组件是否存在
-            if (vehicleController == null)
-            {
-                Debug.LogError("VehicleEffectsManager: 未找到VehicleController组件!");
-                enabled = false;
-                return;
-            }
-
             if (vehicleDriveSystem == null)
             {
                 Debug.LogError("VehicleEffectsManager: 未找到VehicleDriveSystem组件!");
@@ -140,16 +129,16 @@ namespace Vehicle
             UpdateExhaustEffects();
 
             // 更新上一帧速度
-            previousSpeed = vehicleController.GetCurrentSpeed();
+            previousSpeed = vehicleDriveSystem.GetCurrentSpeed();
 
             // 更新碰撞冷却
             if (collisionEffectCooldown > 0)
                 collisionEffectCooldown -= Time.deltaTime;
         }
 
-         
+
         /// 初始化所有粒子系统
-         
+
         private void InitializeParticleSystems()
         {
             // 初始化轮胎烟雾效果
@@ -165,9 +154,9 @@ namespace Vehicle
             InitializeParticleSystemGroup("Exhaust", exhaustEffectPrefabs, 2); // 左右两个排气管
         }
 
-         
+
         /// 初始化指定类型的粒子系统组
-         
+
         private void InitializeParticleSystemGroup(string groupName, ParticleSystem[] prefabs, int count)
         {
             if (prefabs == null || prefabs.Length == 0) return;
@@ -188,9 +177,9 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 设置所有效果的激活状态
-         
+
         private void SetAllEffectsActive(bool active)
         {
             foreach (var systemGroup in activeParticleSystems.Values)
@@ -215,9 +204,9 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 获取路面材质对应的烟雾颜色
-         
+
         private Color GetSurfaceSmokeColor(WheelHit hit)
         {
             if (!enableSurfaceDetection)
@@ -254,19 +243,19 @@ namespace Vehicle
             return asphaltSmokeColor;
         }
 
-         
+
         /// 更新轮胎烟雾效果
-         
+
         private void UpdateWheelSmokeEffects()
         {
             if (!activeParticleSystems.TryGetValue("WheelSmoke", out List<ParticleSystem> smokeSystems) || smokeSystems.Count == 0)
                 return;
 
             // 获取车辆状态
-            float speed = vehicleController.GetCurrentSpeed();
-            bool isSystemDrifting = vehicleController.IsDrifting();
-            bool isInAir = vehicleController.IsInAir();
-            float driftFactor = vehicleController.GetDriftFactor();
+            float speed = vehicleDriveSystem.GetCurrentSpeed();
+            bool isSystemDrifting = vehicleDriveSystem.IsDrifting();
+            bool isInAir = vehicleDriveSystem.IsInAir();
+            float driftFactor = vehicleDriveSystem.GetDriftFactor();
 
             // 获取车辆角速度，用于更精确地检测漂移
             float angularVelocity = Mathf.Abs(vehicleRigidbody.angularVelocity.y);
@@ -429,9 +418,9 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 更新氮气效果
-         
+
         private void UpdateNitroEffects()
         {
             if (!activeParticleSystems.TryGetValue("Nitro", out List<ParticleSystem> nitroSystems) || nitroSystems.Count == 0)
@@ -464,17 +453,17 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 更新刹车效果
-         
+
         private void UpdateBrakeEffects()
         {
             if (!activeParticleSystems.TryGetValue("Brake", out List<ParticleSystem> brakeSystems) || brakeSystems.Count == 0)
                 return;
 
-            float speed = vehicleController.GetCurrentSpeed();
+            float speed = vehicleDriveSystem.GetCurrentSpeed();
             bool isBraking = vehicleDriveSystem.GetBrakeInput() > brakeEffectThreshold;
-            bool showBrakeEffect = isBraking && speed > minSpeedForBrakeEffect && !vehicleController.IsInAir();
+            bool showBrakeEffect = isBraking && speed > minSpeedForBrakeEffect && !vehicleDriveSystem.IsInAir();
 
             for (int i = 0; i < brakeSystems.Count && i < 2; i++)
             {
@@ -501,9 +490,9 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 更新排气效果
-         
+
         private void UpdateExhaustEffects()
         {
             if (!activeParticleSystems.TryGetValue("Exhaust", out List<ParticleSystem> exhaustSystems) || exhaustSystems.Count == 0)
@@ -522,9 +511,9 @@ namespace Vehicle
             }
         }
 
-         
+
         /// 显示碰撞效果
-         
+
         public void ShowCollisionEffect(Vector3 position, Vector3 normal, float impactForce)
         {
             if (collisionEffectPrefab == null || impactForce < minCollisionForce || collisionEffectCooldown > 0)
@@ -543,9 +532,9 @@ namespace Vehicle
             Destroy(collisionEffect.gameObject, collisionEffect.main.duration + 0.5f);
         }
 
-         
+
         /// 当车辆发生碰撞时调用
-         
+
         private void OnCollisionEnter(Collision collision)
         {
             if (collision.relativeVelocity.magnitude > minCollisionForce)

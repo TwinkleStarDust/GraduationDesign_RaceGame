@@ -1,0 +1,1923 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11450fe6987973e46b4cba66d144fd96, type: 3}
+  m_Name: DemoRoads
+  m_EditorClassIdentifier: 
+  roads:
+  - _editorVisible: 1
+    category: Rural
+    roadName: Dirt
+    priority: -1
+    length: 6
+    elevatable: 0
+    oneWay: 0
+    shadowCastingMode: 0
+    splineEdgesEditor:
+    - laneType: 0
+      material: {fileID: 2100000, guid: b1b8bc4d0c116474fac7ebf398549eed, type: 2}
+      positionX: {x: 0, y: 4}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 4
+      material: {fileID: 2100000, guid: 9990436a7517a574681decbc84c63f32, type: 2}
+      positionX: {x: 0, y: 4}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Rural
+    roadName: Gravel
+    priority: -1
+    length: 6
+    elevatable: 0
+    oneWay: 0
+    shadowCastingMode: 0
+    splineEdgesEditor:
+    - laneType: 0
+      material: {fileID: 2100000, guid: ccf793e5f7c84974b979e50b95f66802, type: 2}
+      positionX: {x: 0, y: 4}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 4
+      material: {fileID: 2100000, guid: e83b66538d46ce54eafc9fece1866365, type: 2}
+      positionX: {x: 0, y: 4}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Two
+    roadName: Side Street Asphalt
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: cd99b0764ded8424983ef36330306ec0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Two
+    roadName: Side Street Pave
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: ec42ef1c891553e49a278c903c529581, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Two
+    roadName: Side Street Grass
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 12eb4b79e93cfb140afd9d022b0f91f0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: OneWay
+    roadName: One-Way Asphalt
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 1
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: cd99b0764ded8424983ef36330306ec0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: OneWay
+    roadName: One-Way Pave
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 1
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: ec42ef1c891553e49a278c903c529581, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 0}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    trafficLanes:
+    - trafficLaneType: 0
+      position: 0
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 1
+  - _editorVisible: 1
+    category: OneWay
+    roadName: One-Way Grass
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 1
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 12eb4b79e93cfb140afd9d022b0f91f0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects: []
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Four
+    roadName: Boulevard Asphalt
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: cd99b0764ded8424983ef36330306ec0, type: 2}
+      positionX: {x: 0, y: 3}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: add5ce1f87076fd4b8aaf5a2fd766a31, type: 2}
+      positionX: {x: 9, y: 11}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 3115046674812774474, guid: 6dc02a5b6c586d84187dc47c23058687, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Four
+    roadName: Boulevard Pave
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: ec42ef1c891553e49a278c903c529581, type: 2}
+      positionX: {x: 0, y: 3}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: add5ce1f87076fd4b8aaf5a2fd766a31, type: 2}
+      positionX: {x: 9, y: 11}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 3115046674812774474, guid: 6dc02a5b6c586d84187dc47c23058687, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Four
+    roadName: Boulevard Trees
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: ec42ef1c891553e49a278c903c529581, type: 2}
+      positionX: {x: 0, y: 3}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: add5ce1f87076fd4b8aaf5a2fd766a31, type: 2}
+      positionX: {x: 9, y: 11}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 2425877367910270756, guid: 4964b298699929e4f9c70fa2922019da, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 2.5
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2631678554339153713, guid: 5249b80838952eb49805ccd0827f823f, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 4
+      alignToNormal: 0
+      scale: {x: 0.6787954, y: 1.1003764}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Six
+    roadName: Main Street Asphalt
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: cd99b0764ded8424983ef36330306ec0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: add5ce1f87076fd4b8aaf5a2fd766a31, type: 2}
+      positionX: {x: 11, y: 13}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 3115046674812774474, guid: 6dc02a5b6c586d84187dc47c23058687, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Local_Six
+    roadName: Main Street Trees
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: cd99b0764ded8424983ef36330306ec0, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: 5fa5c2e0443fa884eaed772f5055aaab, type: 2}
+      positionX: {x: 11, y: 13}
+      uvX: {x: 0, y: 1}
+      height: 0.1
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 2425877367910270756, guid: 4964b298699929e4f9c70fa2922019da, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2631678554339153713, guid: 5249b80838952eb49805ccd0827f823f, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 4
+      alignToNormal: 0
+      scale: {x: 0.65872025, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Highway_Six
+    roadName: Highway Six Lights
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 3c6e78f6d6fe33842a179618460a2fd6, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: d25400bfac94d7c4f911a1eb3fa5937f, type: 2}
+      positionX: {x: 11, y: 13}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 3115046674812774474, guid: 6dc02a5b6c586d84187dc47c23058687, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Highway_Six
+    roadName: Highway Six Seperate
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 3c6e78f6d6fe33842a179618460a2fd6, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: d25400bfac94d7c4f911a1eb3fa5937f, type: 2}
+      positionX: {x: 11, y: 13}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 718498901513301029, guid: bf0383acaefae364bbd97e14008e18fb, type: 3}
+      spacingType: 1
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Highway_Eight
+    roadName: Highway Eight Lights
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 3c6e78f6d6fe33842a179618460a2fd6, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: d25400bfac94d7c4f911a1eb3fa5937f, type: 2}
+      positionX: {x: 14, y: 16}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 3115046674812774474, guid: 6dc02a5b6c586d84187dc47c23058687, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+    trafficLanes: []
+  - _editorVisible: 1
+    category: Highway_Eight
+    roadName: Highway Eight Seperate
+    priority: 0
+    length: 6
+    elevatable: 1
+    oneWay: 0
+    shadowCastingMode: 1
+    splineEdgesEditor:
+    - laneType: 1
+      material: {fileID: 2100000, guid: 3c6e78f6d6fe33842a179618460a2fd6, type: 2}
+      positionX: {x: 0, y: 2}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: d25400bfac94d7c4f911a1eb3fa5937f, type: 2}
+      positionX: {x: 14, y: 16}
+      uvX: {x: 0, y: 1}
+      height: 0.001
+      closedEnds: 1
+      invert: 0
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 718498901513301029, guid: bf0383acaefae364bbd97e14008e18fb, type: 3}
+      spacingType: 1
+      spacing: 12
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    trafficLanes: []
+  lanePresets:
+  - _editorVisible: 0
+    category: Local_Two
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 2, y: 8}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 10}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 10}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 2, y: 8}
+      uvX: {x: 0, y: 1}
+      height: 0.5
+      closedEnds: 1
+      invert: 1
+  - _editorVisible: 0
+    category: OneWay
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: ff270acc9dd39ff478146789b3e1252f, type: 2}
+      positionX: {x: 2, y: 8}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 10}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 10}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 2, y: 8}
+      uvX: {x: 0, y: 1}
+      height: 0.5
+      closedEnds: 1
+      invert: 1
+  - _editorVisible: 0
+    category: Local_Four
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: ff270acc9dd39ff478146789b3e1252f, type: 2}
+      positionX: {x: 3, y: 9}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: ff270acc9dd39ff478146789b3e1252f, type: 2}
+      positionX: {x: 11, y: 17}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 10}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 10, y: 20}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 20}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 3, y: 17}
+      uvX: {x: 0, y: 1}
+      height: 1
+      closedEnds: 1
+      invert: 1
+  - _editorVisible: 0
+    category: Local_Six
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: 575f17918b1da184baadc74e49350687, type: 2}
+      positionX: {x: 2, y: 11}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: 575f17918b1da184baadc74e49350687, type: 2}
+      positionX: {x: 13, y: 22}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 12}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 12, y: 24}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 24}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 5, y: 19}
+      uvX: {x: 0, y: 1}
+      height: 1
+      closedEnds: 1
+      invert: 1
+  - _editorVisible: 0
+    category: Highway_Six
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: 18ef41b485d4fea4c9f6dc4cefe91ac3, type: 2}
+      positionX: {x: 2, y: 11}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: 18ef41b485d4fea4c9f6dc4cefe91ac3, type: 2}
+      positionX: {x: 13, y: 22}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 12}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 12, y: 24}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 24}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 5, y: 19}
+      uvX: {x: 0, y: 1}
+      height: 1
+      closedEnds: 1
+      invert: 1
+  - _editorVisible: 0
+    category: Highway_Eight
+    templateName: Lanes
+    lanes:
+    - laneType: 0
+      material: {fileID: 2100000, guid: 567d6b4583bdbab498f0161e1c3f9eae, type: 2}
+      positionX: {x: 2, y: 14}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 0
+      material: {fileID: 2100000, guid: 567d6b4583bdbab498f0161e1c3f9eae, type: 2}
+      positionX: {x: 16, y: 28}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 0, y: 15}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 2
+      material: {fileID: 2100000, guid: 62a032c03b096fe4fa22b10b2b4af82e, type: 2}
+      positionX: {x: 15, y: 30}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 0
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 0, y: 30}
+      uvX: {x: 0, y: 1}
+      height: 0
+      closedEnds: 1
+      invert: 1
+    - laneType: 3
+      material: {fileID: 2100000, guid: 70851b08b7c0bab469ed65675118e150, type: 2}
+      positionX: {x: 5, y: 24}
+      uvX: {x: 0, y: 1}
+      height: 1
+      closedEnds: 1
+      invert: 1
+  spawnObjectPresets:
+  - _editorVisible: 0
+    category: Local_Two
+    spawnObjectName: Lights
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 2425877367910270756, guid: 4964b298699929e4f9c70fa2922019da, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 7806338179774170097, guid: b6b31ebed67df6740890e5c1c107c6cc, type: 3}
+      spacingType: 0
+      spacing: 2
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 1
+      chance: 1
+  - _editorVisible: 0
+    category: OneWay
+    spawnObjectName: Lights
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 2425877367910270756, guid: 4964b298699929e4f9c70fa2922019da, type: 3}
+      spacingType: 0
+      spacing: 12
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 7806338179774170097, guid: b6b31ebed67df6740890e5c1c107c6cc, type: 3}
+      spacingType: 0
+      spacing: 2
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 1
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Two
+    spawnObjectName: Marks
+    spawnObjects:
+    - objectType: 2
+      obj: {fileID: 108959075873001382, guid: 71601b0a2e4485b4fb50d63ab1913ce1, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.001
+      rotation: 0
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 4070ad0d3a3b0c64a9f4c0dea532253c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 1
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 0b7103e51ddff264a856a6cb328df65e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 1
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: OneWay
+    spawnObjectName: Marks
+    spawnObjects:
+    - objectType: 2
+      obj: {fileID: 108959075873001382, guid: 71601b0a2e4485b4fb50d63ab1913ce1, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.001
+      rotation: 0
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 4070ad0d3a3b0c64a9f4c0dea532253c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 1
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 0b7103e51ddff264a856a6cb328df65e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 1
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Two
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 39909b5671e01ed4185d143449949f5c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.4
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 7f25d53d7647c534b8d206994fe91986, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.4
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 4565967489099877324, guid: c8ca9f99900febe459aed8c1a35bed85, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.1
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: OneWay
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 39909b5671e01ed4185d143449949f5c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.4
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 7f25d53d7647c534b8d206994fe91986, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.4
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 4565967489099877324, guid: c8ca9f99900febe459aed8c1a35bed85, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.1
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Four
+    spawnObjectName: Traffic Lights
+    spawnObjects:
+    - objectType: 1
+      obj: {fileID: 8625387259445065090, guid: 352912e3eba46f4428e744f0323a47e3, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 2.5
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Four
+    spawnObjectName: Marks
+    spawnObjects:
+    - objectType: 2
+      obj: {fileID: 108959075873001382, guid: 39cef3c999000d440ada6421d011d4af, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.001
+      rotation: 0
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 4.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 0b7103e51ddff264a856a6cb328df65e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 4.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 1
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 7.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 4070ad0d3a3b0c64a9f4c0dea532253c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 7.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 1
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Four
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 73176664092c55c499e082e45c956e0e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 6d704909289eb0d4d9f601fca4a484f2, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 4565967489099877324, guid: c8ca9f99900febe459aed8c1a35bed85, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.1
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Six
+    spawnObjectName: Traffic Lights
+    spawnObjects:
+    - objectType: 1
+      obj: {fileID: 8625387259445065090, guid: 352912e3eba46f4428e744f0323a47e3, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 0
+      positionOffsetRight: 1.7
+      heightOffset: 0.1
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 1
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Six
+    spawnObjectName: Marks
+    spawnObjects:
+    - objectType: 2
+      obj: {fileID: 8820582431675985096, guid: dee0e41ca2020984ca7016e316e68b73, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: 0.001
+      rotation: 0
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 0b7103e51ddff264a856a6cb328df65e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 3.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 1
+      elevation: 0
+      heightRange: {x: 0, y: 0}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 9.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 4070ad0d3a3b0c64a9f4c0dea532253c, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 9.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 1
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: c4136ec7eeae0384c8ca67138b4b86b0, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 6.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 1
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+    - objectType: 1
+      obj: {fileID: 4873686093874323733, guid: 0b7103e51ddff264a856a6cb328df65e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 1
+      positionOffsetForward: 2
+      positionOffsetRight: 6.5
+      heightOffset: 0.001
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 1
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 1
+      elevation: 0
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Local_Six
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 73176664092c55c499e082e45c956e0e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 6d704909289eb0d4d9f601fca4a484f2, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 4565967489099877324, guid: c8ca9f99900febe459aed8c1a35bed85, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.1
+      heightOffset: 0
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Highway_Six
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 73176664092c55c499e082e45c956e0e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 6d704909289eb0d4d9f601fca4a484f2, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2186514323376660109, guid: 6b762ba363a8ad846b315bbaf7021b98, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.5
+      heightOffset: 0.1
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  - _editorVisible: 0
+    category: Highway_Eight
+    spawnObjectName: Elevation
+    spawnObjects:
+    - objectType: 0
+      obj: {fileID: 4892747336606596603, guid: 73176664092c55c499e082e45c956e0e, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 1.5, y: 3.5}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2588380545289987414, guid: 6d704909289eb0d4d9f601fca4a484f2, type: 3}
+      spacingType: 0
+      spacing: 10
+      position: 0
+      positionOffsetForward: 0
+      positionOffsetRight: 0
+      heightOffset: -0.8
+      rotation: 0
+      alignToNormal: 0
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 3.5, y: 8}
+      removeOverlap: 1
+      chance: 1
+    - objectType: 0
+      obj: {fileID: 2186514323376660109, guid: 6b762ba363a8ad846b315bbaf7021b98, type: 3}
+      spacingType: 1
+      spacing: 1.5
+      position: 2
+      positionOffsetForward: 0
+      positionOffsetRight: 0.5
+      heightOffset: 0.1
+      rotation: 2
+      alignToNormal: 1
+      scale: {x: 1, y: 1}
+      requiresDirection: 0
+      requiresDirectionForward: 0
+      requiresDirectionLeft: 0
+      requiresDirectionRight: 0
+      elevation: 2
+      heightRange: {x: 0, y: 10}
+      removeOverlap: 0
+      chance: 1
+  trafficLanePresets:
+  - _editorVisible: 0
+    category: Rural
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 0
+      position: 3
+      width: 3
+      direction: 0
+      maxSpeed: 30
+      mirror: 1
+  - _editorVisible: 0
+    category: Local_Two
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 1
+      position: 1
+      width: 2
+      direction: 2
+      maxSpeed: 5
+      mirror: 1
+    - trafficLaneType: 0
+      position: 6.5
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 1
+  - _editorVisible: 0
+    category: OneWay
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 1
+      position: 1
+      width: 2
+      direction: 2
+      maxSpeed: 5
+      mirror: 1
+    - trafficLaneType: 0
+      position: 3.5
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 0
+    - trafficLaneType: 0
+      position: 6.5
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 0
+  - _editorVisible: 1
+    category: Local_Four
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 1
+      position: 1.5
+      width: 3
+      direction: 2
+      maxSpeed: 5
+      mirror: 1
+    - trafficLaneType: 0
+      position: 12.5
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 1
+    - trafficLaneType: 0
+      position: 15.5
+      width: 3
+      direction: 0
+      maxSpeed: 50
+      mirror: 1
+  - _editorVisible: 0
+    category: Local_Six
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 1
+      position: 1
+      width: 2
+      direction: 2
+      maxSpeed: 5
+      mirror: 1
+    - trafficLaneType: 0
+      position: 14.5
+      width: 3
+      direction: 0
+      maxSpeed: 70
+      mirror: 1
+    - trafficLaneType: 0
+      position: 17.5
+      width: 3
+      direction: 0
+      maxSpeed: 70
+      mirror: 1
+    - trafficLaneType: 0
+      position: 20.5
+      width: 3
+      direction: 0
+      maxSpeed: 70
+      mirror: 1
+  - _editorVisible: 0
+    category: Highway_Six
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 0
+      position: 14.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+    - trafficLaneType: 0
+      position: 17.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+    - trafficLaneType: 0
+      position: 20.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+  - _editorVisible: 0
+    category: Highway_Eight
+    trafficLanePresetName: 
+    trafficLanes:
+    - trafficLaneType: 0
+      position: 17.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+    - trafficLaneType: 0
+      position: 20.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+    - trafficLaneType: 0
+      position: 23.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1
+    - trafficLaneType: 0
+      position: 26.5
+      width: 3
+      direction: 0
+      maxSpeed: 110
+      mirror: 1

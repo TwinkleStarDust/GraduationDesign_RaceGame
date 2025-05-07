@@ -39,8 +39,8 @@ public class TeleportManager : MonoBehaviour
     // 场景中的所有传送点
     private List<TeleportPoint> teleportPoints = new List<TeleportPoint>();
 
-    // 当前车辆控制器
-    private VehicleController currentVehicle;
+    // 当前车辆驱动系统
+    private VehicleDriveSystem currentVehicle;
 
     // 是否正在传送
     private bool isTeleporting = false;
@@ -82,9 +82,9 @@ public class TeleportManager : MonoBehaviour
         CreateTeleportButtons();
     }
 
-    
+
     /// 查找场景中的所有传送点
-    
+
     private void FindAllTeleportPoints()
     {
         teleportPoints.Clear();
@@ -98,22 +98,22 @@ public class TeleportManager : MonoBehaviour
         Debug.Log($"找到 {teleportPoints.Count} 个传送点");
     }
 
-    
+
     /// 查找当前车辆
-    
+
     private void FindCurrentVehicle()
     {
-        currentVehicle = FindObjectOfType<VehicleController>();
+        currentVehicle = FindObjectOfType<VehicleDriveSystem>();
 
         if (currentVehicle == null)
         {
-            Debug.LogWarning("未找到车辆控制器，传送功能可能无法正常工作");
+            Debug.LogWarning("未找到车辆驱动系统，传送功能可能无法正常工作");
         }
     }
 
-    
+
     /// 创建传送点按钮
-    
+
     private void CreateTeleportButtons()
     {
         if (buttonContainer == null || teleportButtonPrefab == null) return;
@@ -144,9 +144,9 @@ public class TeleportManager : MonoBehaviour
         }
     }
 
-    
+
     /// 切换传送面板显示状态
-    
+
     public void ToggleTeleportPanel()
     {
         isPanelVisible = !isPanelVisible;
@@ -163,9 +163,9 @@ public class TeleportManager : MonoBehaviour
         }
     }
 
-    
+
     /// 传送到指定传送点
-    
+
     public void TeleportToPoint(TeleportPoint point)
     {
         if (isTeleporting || currentVehicle == null || point == null) return;
@@ -196,9 +196,9 @@ public class TeleportManager : MonoBehaviour
         }
     }
 
-    
+
     /// 使用淡入淡出效果传送
-    
+
     private System.Collections.IEnumerator TeleportWithFadeEffect(TeleportPoint point)
     {
         isTeleporting = true;
@@ -238,9 +238,9 @@ public class TeleportManager : MonoBehaviour
         isTeleporting = false;
     }
 
-    
+
     /// 执行传送
-    
+
     private void PerformTeleport(TeleportPoint point)
     {
         if (currentVehicle == null || point == null) return;
@@ -256,9 +256,9 @@ public class TeleportManager : MonoBehaviour
         currentVehicle.FinishTeleport();
     }
 
-    
+
     /// 刷新传送点列表
-    
+
     public void RefreshTeleportPoints()
     {
         FindAllTeleportPoints();

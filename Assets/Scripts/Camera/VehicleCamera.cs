@@ -2,10 +2,10 @@ using UnityEngine;
 
 namespace Vehicle
 {
-    
+
     /// 车辆相机控制器
     /// 负责跟随车辆并提供平滑的相机运动
-    
+
     public class VehicleCamera : MonoBehaviour
     {
         [Tooltip("目标车辆")]
@@ -70,7 +70,7 @@ namespace Vehicle
         // 私有变量
         private Vector3 currentVelocity;
         private float currentRotationAngle = 0;
-        private VehicleController vehicleController;
+        private VehicleDriveSystem vehicleDriveSystem;
 
         // 环绕视角相关变量
         private float orbitX = 0f;
@@ -79,19 +79,19 @@ namespace Vehicle
         private CursorLockMode previousCursorLockState;
         private bool previousCursorVisible;
 
-        
+
         /// 初始化组件
-        
+
         private void Start()
         {
             // 如果没有指定目标，尝试查找场景中的车辆
             if (target == null)
             {
-                var vehicle = FindObjectOfType<VehicleController>();
+                var vehicle = FindObjectOfType<VehicleDriveSystem>();
                 if (vehicle != null)
                 {
                     target = vehicle.transform;
-                    vehicleController = vehicle;
+                    vehicleDriveSystem = vehicle;
                 }
                 else
                 {
@@ -100,7 +100,7 @@ namespace Vehicle
             }
             else
             {
-                vehicleController = target.GetComponent<VehicleController>();
+                vehicleDriveSystem = target.GetComponent<VehicleDriveSystem>();
             }
 
             // 初始化相机位置
@@ -119,9 +119,9 @@ namespace Vehicle
             previousCursorVisible = Cursor.visible;
         }
 
-        
+
         /// 更新相机位置
-        
+
         private void LateUpdate()
         {
             if (target == null) return;
@@ -148,9 +148,9 @@ namespace Vehicle
             UpdateCameraPosition(false);
         }
 
-        
+
         /// 更新相机位置
-        
+
         private void UpdateCameraPosition(bool immediate)
         {
             switch (currentViewMode)
@@ -167,9 +167,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新第一人称视角
-        
+
         private void UpdateFirstPersonView(bool immediate)
         {
             // 计算目标位置
@@ -192,18 +192,18 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新第三人称视角
-        
+
         private void UpdateThirdPersonView(bool immediate)
         {
             // 获取车辆速度和氮气状态
             float speed = 0;
             bool isNitroActive = false;
-            if (vehicleController != null)
+            if (vehicleDriveSystem != null)
             {
-                speed = vehicleController.GetCurrentSpeed();
-                isNitroActive = vehicleController.IsNitroActive();
+                speed = vehicleDriveSystem.GetCurrentSpeed();
+                isNitroActive = vehicleDriveSystem.IsNitroActive();
             }
 
             // 根据车辆速度调整相机跟随平滑度
@@ -259,9 +259,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新环绕视角（鼠标控制）
-        
+
         private void UpdateOrbitView(bool immediate)
         {
             // 获取鼠标输入
@@ -302,17 +302,17 @@ namespace Vehicle
             transform.LookAt(targetCenter);
         }
 
-        
+
         /// 获取当前视角模式
-        
+
         public CameraViewMode GetCurrentViewMode()
         {
             return currentViewMode;
         }
 
-        
+
         /// 设置视角模式
-        
+
         public void SetViewMode(CameraViewMode mode)
         {
             // 如果从环绕模式切换出去，恢复鼠标状态
@@ -342,9 +342,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 恢复鼠标状态
-        
+
         private void RestoreCursorState()
         {
             if (hideCursorInMouseMode)
@@ -355,9 +355,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 当脚本被禁用或销毁时调用
-        
+
         private void OnDisable()
         {
             // 确保恢复鼠标状态

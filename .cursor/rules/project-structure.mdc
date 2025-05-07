@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 赛车游戏项目结构指南
+
+## 目录结构
+
+这个赛车游戏项目遵循模块化结构，代码按功能和系统分类组织。
+
+### 主要目录
+
+- **Assets/Scripts/Core/** - 核心系统和基础组件
+- **Assets/Scripts/Vehicle/** - 车辆控制和物理系统
+- **Assets/Scripts/UI/** - 用户界面相关组件
+- **Assets/Scripts/Camera/** - 摄像机控制和跟踪系统
+- **Assets/Scripts/Environment/** - 环境和场景元素
+- **Assets/Scripts/Track/** - 赛道和路径系统
+- **Assets/Scripts/Managers/** - 游戏管理器和控制器
+- **Assets/Scripts/Systems/** - 独立但相互协作的游戏系统
+- **Assets/Scripts/AI/** - AI控制和行为
+- **Assets/Scripts/Race/** - 比赛逻辑和规则
+- **Assets/Scripts/Data/** - 数据结构和模型
+- **Assets/Scripts/ScriptableObjects/** - 可序列化的数据容器
+- **Assets/Scripts/Utilities/** - 通用工具和辅助方法
+- **Assets/Scripts/Teleport/** - 传送和位置重置功能
+- **Assets/Scripts/Editor/** - 自定义编辑器工具
+
+### 资源组织
+
+- **Assets/Prefab/** - 预制体和可重用组件
+- **Assets/Scenes/** - 游戏场景和关卡
+- **Assets/Texture/** - 纹理和材质资源
+- **Assets/Sounds/** - 音频资源
+- **Assets/Settings/** - 项目设置文件
+
+## 设计原则
+
+1. **组件化设计** - 使用Unity的组件系统实现功能模块化
+2. **单一职责** - 每个脚本和组件应专注于单一功能
+3. **数据驱动** - 使用ScriptableObjects存储和管理游戏数据
+4. **依赖注入** - 使用引用而非直接查找GameObject
+5. **事件系统** - 使用事件解耦系统间的通信
+
+## 命名约定
+
+- 脚本文件采用PascalCase命名法（如：VehicleController.cs）
+- 目录名使用PascalCase（如：Scripts/Vehicle/）
+- 场景文件使用描述性名称（如：MainMenu, RaceTrack01）
+
+## 代码组织
+
+所有C#脚本应遵循统一的代码组织结构，包括适当的regions划分和命名约定。请参考Unity规则文件中的示例代码结构。
+

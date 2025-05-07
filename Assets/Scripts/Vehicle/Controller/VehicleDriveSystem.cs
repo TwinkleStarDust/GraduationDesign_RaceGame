@@ -1,41 +1,32 @@
 // 车辆驱动系统
 // 处理车辆的驱动力、制动力、转向和氮气系统
+// 作为车辆的主控制器，协调各个子系统
 // 简化版本，适合街机风格赛车游戏
 
 using UnityEngine;
 using System.Collections;
+using System;
 
 namespace Vehicle
 {
     public class VehicleDriveSystem : MonoBehaviour
     {
-        /// <summary>
-        /// 驱动类型枚举
-        /// </summary>
-        public enum DriveType
-        {
-            FrontWheelDrive,  // 前轮驱动
-            RearWheelDrive,   // 后轮驱动
-            AllWheelDrive     // 四轮驱动
-        }
-
         #region 公共变量
-        [Header("驱动类型")]
-        [Tooltip("驱动类型")]
-        [SerializeField] private DriveType driveType = DriveType.RearWheelDrive;
+        [Header("调试选项")]
+        [SerializeField] private bool showDebugInfo = false;
 
         [Header("性能参数")]
         [Tooltip("最高速度 (km/h)")]
-        [Range(50f, 400f)]
+        [Range(5f, 300f)]
         [SerializeField] private float maxSpeed = 200f;
 
         [Tooltip("加速度")]
         [Range(10f, 100f)]
         [SerializeField] private float acceleration = 30f;
 
-        [Tooltip("制动力")]
+        [Tooltip("制动力 - 影响S键制动效果")]
         [Range(10f, 300f)]
-        [SerializeField] private float brakeForce = 200f;
+        [SerializeField] private float brakeForce = 150f;
 
         [Tooltip("转向速度")]
         [Range(10f, 100f)]
@@ -73,21 +64,21 @@ namespace Vehicle
         [Range(0.5f, 1.5f)]
         [SerializeField] private float reverseSpeedFactor = 0.8f;
 
-        [Header("手刹设置")]
-        [Tooltip("手刹力度")]
+        [Header("手刹与漂移设置")]
+        [Tooltip("手刹力度 - 影响空格键制动和漂移效果")]
         [Range(100f, 2000f)]
-        [SerializeField] private float handbrakeTorque = 1200f;
+        [SerializeField] private float handbrakeTorque = 500f;
 
-        [Tooltip("漂移时后轮横向刚度系数")]
+        [Tooltip("漂移时后轮横向刚度系数 - 值越低漂移越明显")]
         [Range(0.1f, 1.0f)]
-        [SerializeField] private float driftFactor = 0.9f;
+        [SerializeField] private float driftFactor = 0.5f;
 
-        [Tooltip("漂移恢复时间（秒）")]
+        [Tooltip("漂移恢复时间（秒）- 值越高漂移结束后恢复越平滑")]
         [Range(0.1f, 2.0f)]
-        [SerializeField] private float driftRecoveryTime = 0.8f;
+        [SerializeField] private float driftRecoveryTime = 1.3f;
 
-        [Tooltip("漂移最小速度")]
-        [SerializeField] private float minDriftSpeed = 20f;
+        [Tooltip("漂移最小速度 - 低于此速度不会触发漂移效果")]
+        [SerializeField] private float minDriftSpeed = 25f;
 
         [Tooltip("启用漂移")]
         [SerializeField] private bool enableDrifting = true;
@@ -108,13 +99,16 @@ namespace Vehicle
 
         #endregion
 
+        // 传送事件
+        public event Action OnBeforeTeleport;
+        public event Action OnAfterTeleport;
+
         #region 私有变量
         // 引用
-        private VehicleController vehicleController;
         private VehiclePhysics vehiclePhysics;
         private Rigidbody vehicleRigidbody;
 
-        // 驱动因子
+        // 驱动因子 - 固定为后轮驱动
         private float frontWheelDriveFactor = 0.0f;
         private float rearWheelDriveFactor = 1.0f;
 
@@ -124,7 +118,6 @@ namespace Vehicle
         private float steeringInput = 0f;
         private bool isHandbrakeActive = false;
         private bool isNitroActive = false;
-        private bool isBrakingWithThrottle = false; // 新增：带油门的制动状态标志
 
         // 氮气状态
         private float currentNitroAmount;
@@ -133,18 +126,30 @@ namespace Vehicle
         private float currentSpeed = 0f;
         private float normalizedSpeed = 0f;
         private float motorTorque = 0f;
+        private bool isInAir = false;
+        private bool isFlipped = false;
+        private bool isUpsideDown = false;
+        private bool isDrifting = false;
+        private float currentDriftFactor = 0f;
+        private bool isDriftingRequested = false;
 
         // RPM范围
         private float minRPM = 800f;
         private float maxRPM = 7000f;
         private float currentRPM = 800f;
+
+        // 转向平滑变量
+        private float steeringVelocity = 0f;
+        
+        // 滑行状态过渡变量
+        private float coastingTransitionTime = 0f;
+        private const float FULL_COASTING_TIME = 1.0f; // 完全进入滑行状态需要的时间（秒）
         #endregion
 
         #region 初始化
         private void Awake()
         {
             // 获取组件引用
-            vehicleController = GetComponent<VehicleController>();
             vehiclePhysics = GetComponent<VehiclePhysics>();
             vehicleRigidbody = GetComponent<Rigidbody>();
 
@@ -173,8 +178,9 @@ namespace Vehicle
                 steeringCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
             }
 
-            // 初始化驱动类型系数
-            SetupDriveTypeFactors();
+            // 驱动因子已在声明时固定为后轮驱动，无需 SetupDriveTypeFactors()
+            // frontWheelDriveFactor = 0.0f;
+            // rearWheelDriveFactor = 1.0f;
 
             // 初始化轮胎摩擦力数组
             if (vehiclePhysics != null && vehiclePhysics.GetRearLeftWheel() != null && vehiclePhysics.GetRearRightWheel() != null)
@@ -199,6 +205,18 @@ namespace Vehicle
 
             // 更新氮气状态
             UpdateNitroState();
+
+            // 显示调试信息
+            if (showDebugInfo)
+            {
+                DisplayDebugInfo();
+            }
+        }
+
+        /// 显示调试信息
+        private void DisplayDebugInfo()
+        {
+            Debug.Log($"车辆状态: 速度={currentSpeed:F1}km/h, 在空中={isInAir}, 侧翻={isFlipped}, 倒置={isUpsideDown}, 漂移={isDrifting}");
         }
 
         private void FixedUpdate()
@@ -214,24 +232,7 @@ namespace Vehicle
         }
 
         /// 设置驱动类型因子
-        private void SetupDriveTypeFactors()
-        {
-            switch (driveType)
-            {
-                case DriveType.FrontWheelDrive:
-                    frontWheelDriveFactor = 1.0f;
-                    rearWheelDriveFactor = 0.0f;
-                    break;
-                case DriveType.RearWheelDrive:
-                    frontWheelDriveFactor = 0.0f;
-                    rearWheelDriveFactor = 1.0f;
-                    break;
-                case DriveType.AllWheelDrive:
-                    frontWheelDriveFactor = 0.5f;
-                    rearWheelDriveFactor = 0.5f;
-                    break;
-            }
-        }
+        // Removed SetupDriveTypeFactors() method
         #endregion
 
         #region 更新车辆状态
@@ -247,11 +248,10 @@ namespace Vehicle
             // 计算发动机扭矩
             motorTorque = acceleration * 120f;
 
-            // 更新车辆控制器中的速度
-            if (vehicleController != null)
-            {
-                vehicleController.SetVehicleSpeed(currentSpeed);
-            }
+            // 更新车辆状态
+            isInAir = vehiclePhysics.IsVehicleInAir();
+            isFlipped = vehiclePhysics.IsVehicleFlipped();
+            isUpsideDown = vehiclePhysics.IsVehicleUpsideDown();
         }
 
         private void UpdateRPM()
@@ -306,365 +306,312 @@ namespace Vehicle
                 currentNitroAmount += nitroRecoveryRate * Time.deltaTime;
                 currentNitroAmount = Mathf.Min(nitroCapacity, currentNitroAmount);
             }
-
-            // 更新车辆控制器中的氮气状态
-            if (vehicleController != null)
-            {
-                vehicleController.SetNitroStatus(isNitroActive, currentNitroAmount / nitroCapacity);
-            }
         }
         #endregion
 
         #region 驱动控制
+        /// <summary>
+        /// 应用驱动力和制动力
+        /// </summary>
         private void ApplyDrive()
         {
-            if (vehiclePhysics == null) return;
+            if (vehiclePhysics == null || vehicleRigidbody == null) return;
 
-            // 获取本地空间中的速度
-            Vector3 localVelocity = transform.InverseTransformDirection(vehicleRigidbody.linearVelocity);
-            float forwardSpeed = localVelocity.z;
+            // 获取当前速度和归一化速度
+            currentSpeed = vehicleRigidbody.linearVelocity.magnitude * 3.6f; // m/s to km/h
+            normalizedSpeed = Mathf.Clamp01(currentSpeed / maxSpeed);
+            float reverseNormalizedSpeed = Mathf.Clamp01(currentSpeed / maxReverseSpeed);
 
-            // 计算实际驱动力（考虑氮气加成）
-            float throttleForce = throttleInput * motorTorque;
-            if (isNitroActive && currentNitroAmount > 0)
+            // 判断车辆是否在倒车
+            float dotProduct = Vector3.Dot(transform.forward, vehicleRigidbody.linearVelocity.normalized);
+            bool isReversing = dotProduct < -0.1f && throttleInput <= 0f; // 在后退且没有踩油门
+            bool isMovingForward = dotProduct > 0.1f;
+
+            // 计算引擎扭矩
+            float currentMaxTorque = acceleration * 50f; // 基础扭矩，50是一个经验系数
+            float rpmBasedTorqueMultiplier = engineTorqueCurve.Evaluate(normalizedSpeed);
+            motorTorque = throttleInput * currentMaxTorque * rpmBasedTorqueMultiplier;
+
+            // 氮气加速
+            if (isNitroActive)
             {
-                throttleForce *= nitroBoostFactor;
+                motorTorque *= nitroBoostFactor;
             }
 
-            // 计算制动力 - 提高刹车效果，使用绝对值确保S键始终有效
-            float finalBrakeForce = brakeInput * brakeForce * 3.0f;
-
-            // 应用手刹 - 增强油门+手刹的处理
-            if (isHandbrakeActive)
+            // 限制倒车扭矩
+            if (throttleInput < 0f)
             {
-                // 获取碰撞器引用
-                WheelCollider rearLeft = vehiclePhysics.GetRearLeftWheel();
-                WheelCollider rearRight = vehiclePhysics.GetRearRightWheel();
+                motorTorque *= reverseSpeedFactor;
+            }
 
-                // W+空格（油门+手刹）共存的情况下，降低后轮驱动力，增加制动力
-                if (isBrakingWithThrottle && throttleInput > 0.1f)
-                {
-                    // 仍然应用手刹，但减弱漂移效果，增强制动
-                    float handbrakeFactor = Mathf.Lerp(0.5f, 0.8f, currentSpeed / 100f);
-                    float adjustedHandbrakeTorque = handbrakeTorque * handbrakeFactor;
+            // 根据驱动类型分配扭矩
+            float frontMotorTorque = motorTorque * frontWheelDriveFactor;
+            float rearMotorTorque = motorTorque * rearWheelDriveFactor;
 
-                    // 在油门+手刹情况下，给所有车轮施加一定的制动力
-                    vehiclePhysics.SetHandbrakeTorque(adjustedHandbrakeTorque * 0.3f, adjustedHandbrakeTorque);
-
-                    // 同时减小马达扭矩，但不要完全消除（与W+S的区别）
-                    if (throttleForce > 0)
-                    {
-                        // 快速行驶时降低驱动力，低速时保留更多驱动力
-                        float speedFactor = Mathf.Clamp01(currentSpeed / 80f);
-                        float reducedThrottleFactor = Mathf.Lerp(0.6f, 0.2f, speedFactor);
-
-                        // 应用降低的驱动力
-                        vehiclePhysics.SetMotorTorque(
-                            throttleForce * frontWheelDriveFactor * reducedThrottleFactor,
-                            throttleForce * rearWheelDriveFactor * reducedThrottleFactor
-                        );
-                    }
-
-                    // 根据速度应用漂移效果
-                    if (enableDrifting && currentSpeed > minDriftSpeed && !vehiclePhysics.GetIsInAir())
-                    {
-                        // 为后轮应用漂移，但漂移效果应比纯手刹弱
-                        ApplyLimitedDriftEffect(rearLeft, rearRight, 0.6f);
-                    }
-                }
-                else
-                {
-                    // 原有的手刹逻辑 - 纯手刹模式
-                    // 只有当速度足够高且在地面上时才应用漂移效果
-                    if (enableDrifting && currentSpeed > minDriftSpeed && !vehiclePhysics.GetIsInAir())
-                    {
-                        // 应用漂移效果 - 高速下提高摩擦力以防止过度打滑
-                        ApplyFullDriftEffect(rearLeft, rearRight);
-                    }
-
-                    // 应用手刹扭矩 - 确保立即制动效果
-                    float adjustedHandbrakeTorque = handbrakeTorque * 1.5f; // 增强手刹力度
-
-                    // 不再根据速度降低手刹力度，确保任何速度下都能立即锁死车轮
-                    // 应用强力制动
-                    vehiclePhysics.SetHandbrakeTorque(0f, adjustedHandbrakeTorque);
-
-                    // 立即停止车轮旋转 - 设置车轮角速度为零
-                    vehiclePhysics.StopWheelRotation();
-
-                    // 同时减小马达扭矩以配合制动
-                    vehiclePhysics.SetMotorTorque(0f, 0f);
-                }
+            // 应用电机扭矩
+            // 只有当油门输入和车辆移动方向一致，或车辆静止时才施加扭矩
+            if ((throttleInput > 0 && !isReversing) || (throttleInput < 0 && !isMovingForward) || currentSpeed < 1.0f)
+            {
+                vehiclePhysics.ApplyMotorTorque(frontMotorTorque, rearMotorTorque);
             }
             else
             {
-                // 如果手刹不再激活，恢复轮胎正常摩擦力
-                if (enableDrifting && driftRecoveryCoroutine == null)
-                {
-                    driftRecoveryCoroutine = StartCoroutine(RecoverWheelStiffness());
-                }
-
-                // 通知车辆控制器停止漂移
-                if (vehicleController != null)
-                {
-                    vehicleController.SetDriftState(false, 0f);
-                }
-
-                // 应用正常制动
-                vehiclePhysics.SetBrakeTorque(finalBrakeForce, finalBrakeForce);
+                // 如果油门和移动方向相反，则不施加驱动扭矩（允许滑行或刹车）
+                vehiclePhysics.ApplyMotorTorque(0f, 0f);
             }
 
-            // 处理油门输入 (W键) - 不在手刹状态下
-            if (throttleInput > 0.1f && brakeInput < 0.1f && !isHandbrakeActive)
+            // 处理漂移和手刹逻辑
+            HandleDrifting();
+
+            // 处理普通刹车逻辑 (仅在手刹未激活时应用)
+            if (!isHandbrakeActive)
             {
-                // 根据速度调整动力，高速时减少动力防止打滑
-                float speedAdjustedThrottle = throttleInput;
-                if (currentSpeed > 100f) {
-                    // 高速时逐渐降低加速力，避免轮胎打滑
-                    speedAdjustedThrottle *= Mathf.Lerp(1.0f, 0.6f, (currentSpeed - 100f) / 60f);
-                }
-
-                // 应用驱动力
-                float adjustedThrottleForce = throttleForce * speedAdjustedThrottle;
-                vehiclePhysics.SetMotorTorque(
-                    adjustedThrottleForce * frontWheelDriveFactor,
-                    adjustedThrottleForce * rearWheelDriveFactor
-                );
-
-                // 确保制动力为0
-                vehiclePhysics.SetBrakeTorque(0, 0);
+                ApplyBraking(isReversing);
             }
-            // 处理刹车/倒车输入 (S键) - 不在手刹状态下
-            else if (brakeInput > 0.1f && !isHandbrakeActive)
+            else
             {
-                // 如果车辆正在向前移动，应用制动力
-                if (forwardSpeed > 1.0f)
-                {
-                    // 应用强力制动以迅速减速
-                    float speedBasedBrakeForce = finalBrakeForce * 2.0f;
-                    vehiclePhysics.SetBrakeTorque(speedBasedBrakeForce, speedBasedBrakeForce);
-                    vehiclePhysics.SetMotorTorque(0f, 0f);
-                }
-                // 如果车辆几乎停止，应用倒车力
-                else if (Mathf.Abs(forwardSpeed) < 1.0f)
-                {
-                    // 先清除制动力
-                    vehiclePhysics.SetBrakeTorque(0f, 0f);
-
-                    // 应用强力倒车
-                    float reverseMotorTorque = -motorTorque * brakeInput * reverseSpeedFactor * 2.0f;
-                    vehiclePhysics.SetMotorTorque(
-                        reverseMotorTorque * frontWheelDriveFactor,
-                        reverseMotorTorque * rearWheelDriveFactor
-                    );
-                }
-                // 已经在倒车
-                else if (forwardSpeed < -0.5f)
-                {
-                    // 继续倒车
-                    float reverseMotorTorque = -motorTorque * brakeInput * reverseSpeedFactor * 2.0f;
-                    vehiclePhysics.SetMotorTorque(
-                        reverseMotorTorque * frontWheelDriveFactor,
-                        reverseMotorTorque * rearWheelDriveFactor
-                    );
-                    vehiclePhysics.SetBrakeTorque(0f, 0f);
-                }
-            }
-            // W+S同时按下的情况，油门和刹车同时存在（isBrakingWithThrottle类似，但手刹未激活）
-            else if (throttleInput > 0.01f && brakeInput > 0.01f && !isHandbrakeActive)
-            {
-                // 仍然保留一些驱动力，但同时施加制动力
-                float reducedThrottleFactor = 0.3f; // 保留30%油门效果
-                float adjustedThrottleForce = throttleForce * reducedThrottleFactor;
-
-                // 应用降低的驱动力
-                vehiclePhysics.SetMotorTorque(
-                    adjustedThrottleForce * frontWheelDriveFactor,
-                    adjustedThrottleForce * rearWheelDriveFactor
-                );
-
-                // 同时应用制动
-                float enhancedBrakeForce = finalBrakeForce * 1.5f;
-                vehiclePhysics.SetBrakeTorque(enhancedBrakeForce, enhancedBrakeForce);
-            }
-            // 没有输入时（滑行状态）
-            else if (!isHandbrakeActive)
-            {
-                vehiclePhysics.SetMotorTorque(0f, 0f);
-                // 应用轻微的制动力模拟发动机制动
-                vehiclePhysics.SetBrakeTorque(brakeForce * 0.2f, brakeForce * 0.2f);
+                // 如果手刹激活，则不应用普通刹车
+                // 手刹的制动力在 HandleDrifting() 中已经通过 SetBrakeTorque 应用了
+                // 为确保之前的普通刹车扭矩被清除，可以再次调用SetBrakeTorque(0, 0)，但这取决于HandleDrifting的具体实现。
+                // 目前HandleDrifting会调用SetBrakeTorque(0, handbrakeTorque)，已经覆盖了之前的刹车值。
             }
         }
 
         /// <summary>
-        /// 恢复轮胎摩擦力的协程
+        /// 处理漂移逻辑
+        /// </summary>
+        private void HandleDrifting()
+        {
+            if (!enableDrifting || vehiclePhysics == null) return;
+
+            // 检查是否满足漂移条件：激活手刹、不在空中、达到最小漂移速度
+            bool canDrift = isHandbrakeActive && !isInAir && currentSpeed >= minDriftSpeed;
+
+            if (canDrift && !isDrifting)
+            {
+                // 开始漂移
+                StartDrift();
+            }
+            else if (!canDrift && isDrifting)
+            {
+                // 停止漂移
+                StopDrift();
+            }
+
+            // 如果正在漂移或手刹激活（即使速度不够漂移），应用手刹制动力
+            if (isHandbrakeActive)
+            {
+                // 手刹只作用于后轮
+                vehiclePhysics.SetBrakeTorque(0f, handbrakeTorque);
+            }
+            else if (!isDrifting)
+            {
+                 // 如果手刹未激活且未在漂移恢复中，确保手刹制动力为0
+                 // （普通刹车逻辑在 ApplyBraking 中处理）
+                 // 注意：这里不再需要设置刹车为0，因为 ApplyBraking 会覆盖
+                 // 如果 ApplyBraking 因为 brakeInput 为0 而不设置刹车，
+                 // 则需要确保手刹释放后刹车扭矩被清零。
+                 // 为安全起见，可以在 ApplyBraking 中处理 brakeInput 为 0 的情况。
+            }
+        }
+
+        /// <summary>
+        /// 开始漂移
+        /// </summary>
+        private void StartDrift()
+        {
+            isDrifting = true;
+            vehiclePhysics.SetRearWheelStiffness(driftFactor);
+
+            // 停止可能正在运行的恢复协程
+            if (driftRecoveryCoroutine != null)
+            {
+                StopCoroutine(driftRecoveryCoroutine);
+                driftRecoveryCoroutine = null;
+            }
+            // 应用手刹制动力 (已移至 HandleDrifting 的调用处)
+            // vehiclePhysics.SetBrakeTorque(0f, handbrakeTorque, true);
+        }
+
+        /// <summary>
+        /// 停止漂移并开始恢复
+        /// </summary>
+        private void StopDrift()
+        {
+            isDrifting = false;
+            // 启动恢复协程
+            if (driftRecoveryCoroutine == null)
+            {
+                driftRecoveryCoroutine = StartCoroutine(RecoverWheelStiffness());
+            }
+            // 移除手刹制动力 (相关逻辑现在由 ApplyBraking 处理)
+            // vehiclePhysics.SetBrakeTorque(0f, 0f, false);
+        }
+
+        /// <summary>
+        /// 应用普通制动力（S键或倒车时的自动制动）
+        /// </summary>
+        /// <param name="_isReversing">车辆是否正在倒车</param>
+        private void ApplyBraking(bool _isReversing)
+        {
+            float baseBrakeForce = 0f;
+
+            // 情况1: 按下刹车键 (S)
+            if (brakeInput > 0.01f)
+            {
+                // 基于速度动态调整基础制动力
+                float speedFactor = Mathf.Clamp01(currentSpeed / maxSpeed);
+                baseBrakeForce = brakeInput * brakeForce * Mathf.Lerp(0.4f, 1.0f, speedFactor);
+            }
+            // 情况2: 倒车时的自动制动
+            else if (_isReversing && throttleInput >= 0f)
+            {
+                // 倒车时使用较小的制动力
+                baseBrakeForce = brakeForce * 0.2f;
+            }
+
+            // 计算最终制动力
+            float finalBrakeForce = 0f;
+            if (baseBrakeForce > 0.01f)
+            {
+                // 基于当前速度调整制动力
+                float currentSpeedAbs = Mathf.Abs(currentSpeed);
+                float highSpeedThreshold = maxSpeed * 0.7f;  // 高速阈值提高到70%
+                float lowSpeedThreshold = maxSpeed * 0.15f;  // 低速阈值提高到15%
+
+                // 计算速度系数
+                float speedFactor;
+                if (currentSpeedAbs > highSpeedThreshold)
+                {
+                    // 高速区域：保持较强制动力
+                    speedFactor = Mathf.Lerp(1.0f, 0.8f, (currentSpeedAbs - highSpeedThreshold) / (maxSpeed - highSpeedThreshold));
+                }
+                else if (currentSpeedAbs > lowSpeedThreshold)
+                {
+                    // 中速区域：完全制动力
+                    speedFactor = 1.0f;
+                }
+                else
+                {
+                    // 低速区域：渐进减弱制动力，实现平滑停车
+                    speedFactor = Mathf.Lerp(0.3f, 1.0f, currentSpeedAbs / lowSpeedThreshold);
+                }
+
+                finalBrakeForce = baseBrakeForce * speedFactor;
+
+                // 在坡道上时调整制动力
+                if (vehiclePhysics != null && vehiclePhysics.IsOnSlope())
+                {
+                    float slopeAngle = vehiclePhysics.GetSlopeAngle();
+                    float slopeFactor = Mathf.Lerp(0.7f, 1.2f, slopeAngle / 45f);
+                    finalBrakeForce *= slopeFactor;
+                }
+            }
+
+            // 在空中时减少制动力
+            if (isInAir)
+            {
+                finalBrakeForce *= 0.2f;
+            }
+
+            // 应用制动力到车轮
+            vehiclePhysics.SetBrakeTorque(finalBrakeForce, finalBrakeForce);
+
+            // 在低速时增加阻力以帮助车辆平稳停止
+            if (currentSpeed < 5f && brakeInput > 0.5f)
+            {
+                if (vehicleRigidbody != null)
+                {
+                    float stopDrag = Mathf.Lerp(0.1f, 2f, (5f - currentSpeed) / 5f);
+                    vehicleRigidbody.linearDamping = stopDrag;
+                }
+            }
+            else if (vehicleRigidbody != null)
+            {
+                vehicleRigidbody.linearDamping = 0.1f;
+            }
+        }
+
+        /// <summary>
+        /// 恢复车轮刚度的协程
         /// </summary>
         private IEnumerator RecoverWheelStiffness()
         {
-            // 获取碰撞器引用
-            WheelCollider rearLeft = vehiclePhysics.GetRearLeftWheel();
-            WheelCollider rearRight = vehiclePhysics.GetRearRightWheel();
-
-            if (rearLeft == null || rearRight == null)
+            if (vehiclePhysics == null)
             {
-                yield break;
-            }
-
-            float elapsedTime = 0;
-
-            // 获取当前的摩擦力设置
-            WheelFrictionCurve currentLeftFriction = rearLeft.sidewaysFriction;
-            WheelFrictionCurve currentRightFriction = rearRight.sidewaysFriction;
-
-            // 确保当前值有效
-            if (currentLeftFriction.stiffness <= 0 || currentRightFriction.stiffness <= 0)
-            {
-                rearLeft.sidewaysFriction = originalSidewaysFriction[2];
-                rearRight.sidewaysFriction = originalSidewaysFriction[3];
                 driftRecoveryCoroutine = null;
                 yield break;
             }
 
-            // 根据速度调整恢复时间，高速时需要更长的恢复时间
-            float speedFactor = Mathf.Clamp01(currentSpeed / maxSpeed);
-            float adjustedRecoveryTime = driftRecoveryTime * (1.0f + speedFactor * 0.5f);
+            Debug.Log("【车辆驱动】开始恢复车轮刚度...");
 
-            while (elapsedTime < adjustedRecoveryTime)
+            float elapsedTime = 0f;
+            // 获取当前漂移时的刚度因子 (driftFactor) 和目标刚度因子 (1.0f)
+            float startFactor = driftFactor; // 或者更精确地获取当前实际应用的因子，但driftFactor应该足够
+            float endFactor = 1.0f;
+
+            while (elapsedTime < driftRecoveryTime)
             {
                 elapsedTime += Time.deltaTime;
-                // 使用平方插值让恢复更加自然
-                float t = (elapsedTime / adjustedRecoveryTime);
-                t = t * t;
+                float t = Mathf.Clamp01(elapsedTime / driftRecoveryTime);
+                // 使用平滑插值 (例如 SmoothStep)
+                t = t * t * (3f - 2f * t);
 
-                // 平滑恢复摩擦力
-                WheelFrictionCurve leftFriction = rearLeft.sidewaysFriction;
-                WheelFrictionCurve rightFriction = rearRight.sidewaysFriction;
-
-                leftFriction.stiffness = Mathf.Lerp(
-                    currentLeftFriction.stiffness,
-                    originalSidewaysFriction[2].stiffness,
-                    t
-                );
-
-                rightFriction.stiffness = Mathf.Lerp(
-                    currentRightFriction.stiffness,
-                    originalSidewaysFriction[3].stiffness,
-                    t
-                );
-
-                rearLeft.sidewaysFriction = leftFriction;
-                rearRight.sidewaysFriction = rightFriction;
+                float currentFactor = Mathf.Lerp(startFactor, endFactor, t);
+                vehiclePhysics.SetRearWheelStiffness(currentFactor);
 
                 yield return null;
             }
 
-            // 确保最终值是原始值
-            rearLeft.sidewaysFriction = originalSidewaysFriction[2];
-            rearRight.sidewaysFriction = originalSidewaysFriction[3];
+            // 确保最终恢复到精确的原始值
+            vehiclePhysics.RestoreOriginalRearWheelStiffness(); 
+            // 或者 vehiclePhysics.SetRearWheelStiffness(1.0f); 也可以，取决于 Restore 方法的实现是否更可靠
 
+            Debug.Log("【车辆驱动】车轮刚度恢复完成。");
             driftRecoveryCoroutine = null;
-        }
-
-        /// <summary>
-        /// 应用完全漂移效果
-        /// </summary>
-        private void ApplyFullDriftEffect(WheelCollider rearLeft, WheelCollider rearRight)
-        {
-            WheelFrictionCurve leftFriction = rearLeft.sidewaysFriction;
-            WheelFrictionCurve rightFriction = rearRight.sidewaysFriction;
-
-            // 速度越高，保持越高的摩擦力以维持稳定性
-            // 超过100km/h时增加最小摩擦力系数
-            float speedBasedDriftFactor = Mathf.Lerp(driftFactor,
-                                                   Mathf.Min(1.0f, driftFactor + 0.5f),
-                                                   Mathf.Clamp01((currentSpeed - 80) / 60f));
-
-            // 提高漂移时的横向摩擦力，避免完全失控
-            float adjustedDriftFactor = Mathf.Lerp(0.8f, speedBasedDriftFactor, Mathf.Min(1.0f, currentSpeed / 100f));
-
-            // 确保高速不会过度打滑
-            if (currentSpeed > 120f) {
-                adjustedDriftFactor = Mathf.Lerp(adjustedDriftFactor, 1.0f, (currentSpeed - 120f) / 40f);
-            }
-
-            leftFriction.stiffness = originalSidewaysFriction[2].stiffness * adjustedDriftFactor;
-            rightFriction.stiffness = originalSidewaysFriction[3].stiffness * adjustedDriftFactor;
-
-            rearLeft.sidewaysFriction = leftFriction;
-            rearRight.sidewaysFriction = rightFriction;
-
-            // 如果已经有恢复协程在运行，停止它
-            if (driftRecoveryCoroutine != null)
-            {
-                StopCoroutine(driftRecoveryCoroutine);
-                driftRecoveryCoroutine = null;
-            }
-
-            // 通知车辆控制器正在漂移
-            if (vehicleController != null)
-            {
-                vehicleController.SetDriftState(true, 1.0f - adjustedDriftFactor);
-            }
-        }
-
-        /// <summary>
-        /// 应用有限的漂移效果（油门+手刹情况）
-        /// </summary>
-        private void ApplyLimitedDriftEffect(WheelCollider rearLeft, WheelCollider rearRight, float intensityFactor)
-        {
-            WheelFrictionCurve leftFriction = rearLeft.sidewaysFriction;
-            WheelFrictionCurve rightFriction = rearRight.sidewaysFriction;
-
-            // 对于油门+手刹情况，增加摩擦力，减弱漂移效果
-            float baseFactor = driftFactor + (1.0f - driftFactor) * (1.0f - intensityFactor);
-            float speedBasedDriftFactor = Mathf.Lerp(baseFactor,
-                                                  Mathf.Min(1.0f, baseFactor + 0.3f),
-                                                  Mathf.Clamp01((currentSpeed - 80) / 60f));
-
-            // 提高漂移时的横向摩擦力，减少打滑
-            float adjustedDriftFactor = Mathf.Lerp(0.85f, speedBasedDriftFactor, Mathf.Min(1.0f, currentSpeed / 100f));
-
-            // 高速时更快回归正常状态
-            if (currentSpeed > 100f) {
-                adjustedDriftFactor = Mathf.Lerp(adjustedDriftFactor, 1.0f, (currentSpeed - 100f) / 40f);
-            }
-
-            leftFriction.stiffness = originalSidewaysFriction[2].stiffness * adjustedDriftFactor;
-            rightFriction.stiffness = originalSidewaysFriction[3].stiffness * adjustedDriftFactor;
-
-            rearLeft.sidewaysFriction = leftFriction;
-            rearRight.sidewaysFriction = rightFriction;
-
-            // 如果已经有恢复协程在运行，停止它
-            if (driftRecoveryCoroutine != null)
-            {
-                StopCoroutine(driftRecoveryCoroutine);
-                driftRecoveryCoroutine = null;
-            }
-
-            // 通知车辆控制器正在漂移，但强度更低
-            if (vehicleController != null)
-            {
-                vehicleController.SetDriftState(true, (1.0f - adjustedDriftFactor) * intensityFactor);
-            }
         }
         #endregion
 
+        /// <summary>
+        /// 应用转向 - 优化版本，提供更平滑的转向体验
+        /// 避免轻微转向就导致车辆甩尾
+        /// </summary>
         private void ApplySteering()
         {
             if (vehiclePhysics == null) return;
 
+            // 应用死区，忽略极小的转向输入，避免意外漂移
+            float adjustedSteeringInput = steeringInput;
+            float deadzone = 0.05f; // 5%的死区
+            if (Mathf.Abs(steeringInput) < deadzone)
+            {
+                adjustedSteeringInput = 0f;
+            }
+            else
+            {
+                // 重新映射输入范围，保持平滑过渡
+                float sign = Mathf.Sign(steeringInput);
+                adjustedSteeringInput = sign * (Mathf.Abs(steeringInput) - deadzone) / (1f - deadzone);
+            }
+
             // 根据速度调整转向
-            float speedFactor = Mathf.Clamp01(currentSpeed / 100f);
+            float currentSpeedKmh = currentSpeed * (1f / KMH_TO_MS); // 转换为 km/h 以便理解
+            
+            // 简化：高速时线性降低最大转向角度
+            // 例如：速度 > 60km/h 时开始降低，到 150km/h 时降低到最大值的 40%
+            float highSpeedSteeringLimitStart = 60f;
+            float highSpeedSteeringLimitEnd = 150f;
+            float minSteeringFactor = 0.4f; // 高速时最小转向系数
 
-            // 高速下大幅减小转向角度，防止过度转向
-            float highSpeedReduction = Mathf.Lerp(1f, 0.3f, Mathf.Clamp01((currentSpeed - 80f) / 40f));
+            float speedBasedSteeringFactor = 1.0f;
+            if (currentSpeedKmh > highSpeedSteeringLimitStart)
+            {
+                speedBasedSteeringFactor = Mathf.Lerp(1.0f, minSteeringFactor, 
+                    Mathf.Clamp01((currentSpeedKmh - highSpeedSteeringLimitStart) / (highSpeedSteeringLimitEnd - highSpeedSteeringLimitStart)));
+            }
 
-            // 使用转向曲线获取响应系数
-            float steeringResponse = steeringCurve.Evaluate(speedFactor);
-
-            // 计算转向角度 - 高速下更进一步减小转向角度
-            float targetSteeringAngle = maxSteeringAngle * steeringInput * (1f - speedFactor * 0.7f) * highSpeedReduction;
+            // 计算最终转向角度
+            float targetSteeringAngle = maxSteeringAngle * adjustedSteeringInput * speedBasedSteeringFactor;
 
             // 平滑转向输入，防止突然的转向造成失控
             float deltaTime = Time.fixedDeltaTime;
@@ -674,33 +621,51 @@ namespace Vehicle
                 currentSteerAngle = vehiclePhysics.GetFrontLeftWheel().steerAngle;
             }
 
-            // 转向变化速率基于速度进行调整，高速时转向更缓慢
-            float steerSpeed = Mathf.Lerp(steeringSpeed, steeringSpeed * 0.5f, speedFactor);
-            float smoothedSteeringAngle = Mathf.Lerp(currentSteerAngle, targetSteeringAngle, deltaTime * steerSpeed);
+            // 转向变化速率基于速度和转向幅度进行调整
+            // 1. 高速时转向更缓慢
+            // 2. 大幅度转向时响应更缓慢，避免突然甩尾
+            float steerSpeedBase = Mathf.Lerp(steeringSpeed, steeringSpeed * 0.6f, normalizedSpeed);
+
+            // 根据转向幅度调整响应速度 - 大幅度转向时响应更缓慢
+            float turnMagnitude = Mathf.Abs(targetSteeringAngle - currentSteerAngle) / maxSteeringAngle;
+            float steerSpeed = steerSpeedBase * (1f - turnMagnitude * 0.3f);
+
+            // 使用更平滑的插值
+            float smoothFactor = deltaTime * steerSpeed;
+            float smoothedSteeringAngle = Mathf.Lerp(currentSteerAngle, targetSteeringAngle, smoothFactor);
 
             // 应用转向
             vehiclePhysics.SetSteeringAngle(smoothedSteeringAngle, smoothedSteeringAngle);
         }
 
+        /// <summary>
+        /// 限制车辆速度 - 现在只用于确保低阻尼，不再施加限制力
+        /// </summary>
         private void LimitSpeed()
         {
+            // 确保线性阻尼保持在预期的低值，以依赖自定义空气阻力
+            if (vehicleRigidbody != null && vehicleRigidbody.linearDamping > 0.001f) // 只在阻尼过高时设置
+            {
+                vehicleRigidbody.linearDamping = 0.0005f;
+            }
+            
+            // 移除所有强制速度限制逻辑
+            /*
+            // --- 以下是旧的强制限速逻辑 --- 
             if (vehicleRigidbody == null) return;
 
-            // 获取本地空间中的速度
-            Vector3 localVelocity = transform.InverseTransformDirection(vehicleRigidbody.linearVelocity);
-            float forwardSpeed = localVelocity.z;
-            float currentKmhSpeed = forwardSpeed * (1f / KMH_TO_MS);
+            // 获取当前速度 (使用速度向量的模长)
+            float currentMpsSpeed = vehicleRigidbody.linearVelocity.magnitude;
+            float currentKmhSpeed = currentMpsSpeed * (1f / KMH_TO_MS); // 转换为 km/h
 
-            // 计算氮气增强的最大速度
-            float effectiveMaxSpeed = maxSpeed;
+            // --- 限制前进速度 --- 
+            float effectiveMaxSpeed = maxSpeed; // km/h
+            bool limitForwardSpeed = true; // 标记是否需要限制前进速度
 
-            // 如果氮气激活且有氮气可用，允许车辆超过普通最大速度
+            // 如果氮气激活且有氮气可用，提高有效最大速度
             if (isNitroActive && currentNitroAmount > 0)
             {
-                // 氮气增强的最大速度 = 普通最大速度 * 氮气加速系数
-                // 使用氮气加速系数作为最大速度的增强系数，保持一致性
                 effectiveMaxSpeed = maxSpeed * nitroBoostFactor;
-
                 // 如果氮气量较少，逐渐降低最大速度增强效果
                 if (currentNitroAmount < nitroCapacity * 0.3f)
                 {
@@ -711,63 +676,110 @@ namespace Vehicle
                 }
             }
 
-            // 限制前进速度 - 使用 AddForce 而不是直接修改 linearVelocity
-            if (currentKmhSpeed > effectiveMaxSpeed)
+            // 检查是否在倒车，如果在倒车，则不限制前进速度
+            float forwardDot = Vector3.Dot(vehicleRigidbody.linearVelocity.normalized, transform.forward);
+            if (forwardDot < -0.1f && currentKmhSpeed > 1.0f) // 速度大于1才算有效倒车
+            {
+                 limitForwardSpeed = false; // 正在倒车，不应用前进速度限制
+            }
+
+            // 限制前进速度逻辑
+            if (limitForwardSpeed && currentKmhSpeed > effectiveMaxSpeed)
             {
                 // 计算超出有效最大速度的程度
                 float overSpeedRatio = (currentKmhSpeed - effectiveMaxSpeed) / effectiveMaxSpeed;
 
-                // 计算需要施加的减速力
-                // 超速越多，减速力越大，但保持平滑过渡
-                float brakingForce = vehicleRigidbody.mass * overSpeedRatio * 50f;
-
-                // 限制最大减速力，避免过度反应
-                brakingForce = Mathf.Min(brakingForce, vehicleRigidbody.mass * 20f);
+                // 计算需要施加的减速力 - 稍微加强基础力度 (40f -> 50f)
+                float brakingForce = vehicleRigidbody.mass * overSpeedRatio * overSpeedRatio * 50f; 
+                // 稍微加强最大限制 (15f -> 18f)
+                brakingForce = Mathf.Min(brakingForce, vehicleRigidbody.mass * 18f); 
 
                 // 如果使用氮气，减小制动力，使加速感更强
                 if (isNitroActive && currentNitroAmount > 0)
                 {
                     // 氮气激活时减小制动力，使车辆能够更快地加速到氮气增强的最大速度
-                    brakingForce *= 0.7f;
+                    brakingForce *= 0.6f;
                 }
 
-                // 应用与车辆前进方向相反的力
-                vehicleRigidbody.AddForce(-transform.forward * brakingForce, ForceMode.Force);
+                // 在坡道上时减小制动力，让重力影响车辆速度
+                if (vehiclePhysics != null && vehiclePhysics.IsOnSlope())
+                {
+                    // 在坡道上减小制动力，让车辆能够自然加速/减速
+                    brakingForce *= 0.4f;
+                }
 
-                // 如果超速过多，增加临时阻力以帮助减速
+                // 应用与车辆当前速度方向相反的力
+                Vector3 brakingDirection = -vehicleRigidbody.linearVelocity.normalized;
+                // 确保速度方向有效
+                if (brakingDirection != Vector3.zero)
+                {
+                    vehicleRigidbody.AddForce(brakingDirection * brakingForce, ForceMode.Force);
+                }
+                
+                // 如果超速过多，增加临时阻力以帮助减速，但不要过度
                 if (overSpeedRatio > 0.1f)
                 {
                     // 临时增加线性阻力，但保持平滑过渡
-                    float tempDrag = Mathf.Lerp(0.01f, 0.5f, overSpeedRatio);
+                    // 使用较小的最大阻力值，避免车辆突然停止
+                    float tempDrag = Mathf.Lerp(0.01f, 0.3f, overSpeedRatio * 0.8f);
+
+                    // 在坡道上减小阻力，让车辆保持惯性
+                    if (vehiclePhysics != null && vehiclePhysics.IsOnSlope())
+                    {
+                        tempDrag *= 0.5f;
+                    }
+
+                    // 设置临时阻力，但不要覆盖现有阻力
                     vehicleRigidbody.linearDamping = Mathf.Max(vehicleRigidbody.linearDamping, tempDrag);
                 }
             }
-            else
+            else if (!limitForwardSpeed) // 如果是因为倒车而没限制前进速度，也要恢复阻力
             {
-                // 当速度正常时，恢复默认阻力
-                vehicleRigidbody.linearDamping = 0.01f;
+                 vehicleRigidbody.linearDamping = 0.0005f; 
+            }
+            else // 速度正常时恢复低阻力
+            {
+                vehicleRigidbody.linearDamping = 0.0005f;
             }
 
-            // 限制倒车速度 - 同样使用 AddForce
-            if (currentKmhSpeed < -maxReverseSpeed)
+            // --- 限制倒车速度 --- 
+            // forwardDot 已经在前面计算过
+            if (forwardDot < -0.1f && currentKmhSpeed > maxReverseSpeed) // 检查是否在倒车且超速
             {
                 // 计算超出最大倒车速度的程度
-                float overSpeedRatio = (-currentKmhSpeed - maxReverseSpeed) / maxReverseSpeed;
+                float overSpeedRatio = (currentKmhSpeed - maxReverseSpeed) / maxReverseSpeed;
+                
+                // 计算需要施加的减速力 (施加到前进方向以减慢倒车) - 稍微加强基础力度 (30f -> 40f)
+                float brakingForce = vehicleRigidbody.mass * overSpeedRatio * overSpeedRatio * 40f; 
+                // 稍微加强最大限制 (10f -> 12f)
+                brakingForce = Mathf.Min(brakingForce, vehicleRigidbody.mass * 12f); 
 
-                // 计算需要施加的减速力
-                float brakingForce = vehicleRigidbody.mass * overSpeedRatio * 50f;
-                brakingForce = Mathf.Min(brakingForce, vehicleRigidbody.mass * 20f);
+                // 在坡道上时减小制动力，让重力影响车辆速度
+                if (vehiclePhysics != null && vehiclePhysics.IsOnSlope())
+                {
+                    // 在坡道上减小制动力，让车辆能够自然加速/减速
+                    brakingForce *= 0.3f;
+                }
 
-                // 应用与车辆后退方向相反的力
-                vehicleRigidbody.AddForce(transform.forward * brakingForce, ForceMode.Force);
+                // 应用与车辆倒车方向相反的力（即车辆前进方向）
+                Vector3 brakingDirection = transform.forward; 
+                vehicleRigidbody.AddForce(brakingDirection * brakingForce, ForceMode.Force);
 
                 // 如果超速过多，增加临时阻力
-                if (overSpeedRatio > 0.1f)
+                if (overSpeedRatio > 0.2f)
                 {
-                    float tempDrag = Mathf.Lerp(0.01f, 0.5f, overSpeedRatio);
+                    float tempDrag = Mathf.Lerp(0.005f, 0.2f, overSpeedRatio * 0.7f);
+
+                    // 在坡道上减小阻力，让车辆保持惯性
+                    if (vehiclePhysics != null && vehiclePhysics.IsOnSlope())
+                    {
+                        tempDrag *= 0.4f;
+                    }
+
                     vehicleRigidbody.linearDamping = Mathf.Max(vehicleRigidbody.linearDamping, tempDrag);
                 }
             }
+            */
         }
 
         #region 公共接口
@@ -849,12 +861,6 @@ namespace Vehicle
             return maxSpeed;
         }
 
-        /// 获取驱动类型
-        public DriveType GetDriveType()
-        {
-            return driveType;
-        }
-
         /// 获取转向输入值
         public float GetSteeringInput()
         {
@@ -867,12 +873,143 @@ namespace Vehicle
             return isHandbrakeActive;
         }
 
-        /// <summary>
-        /// 设置是否同时使用油门和制动
-        /// </summary>
-        public void SetBrakingWithThrottle(bool active)
+        /// 获取是否正在漂移
+        public bool IsDrifting()
         {
-            isBrakingWithThrottle = active;
+            return isDrifting;
+        }
+
+        /// 获取当前漂移强度
+        public float GetDriftFactor()
+        {
+            return currentDriftFactor;
+        }
+
+        /// 获取是否在空中
+        public bool IsInAir()
+        {
+            return isInAir;
+        }
+
+        /// 获取是否侧翻
+        public bool IsFlipped()
+        {
+            return isFlipped;
+        }
+
+        /// 获取是否倒置
+        public bool IsUpsideDown()
+        {
+            return isUpsideDown;
+        }
+
+        /// 设置车辆状态
+        public void SetVehicleState(bool inAir, bool flipped, bool upsideDown)
+        {
+            isInAir = inAir;
+            isFlipped = flipped;
+            isUpsideDown = upsideDown;
+        }
+
+        /// 设置漂移状态
+        public void SetDriftState(bool drifting, float driftFactor)
+        {
+            isDrifting = drifting;
+            currentDriftFactor = driftFactor;
+        }
+
+        /// 重置车辆
+        public void ResetVehicle()
+        {
+            // 重置物理状态
+            if (vehiclePhysics != null)
+            {
+                vehiclePhysics.ResetPhysics();
+            }
+
+            // 重置位置和旋转
+            transform.position = new Vector3(transform.position.x, transform.position.y + 1.0f, transform.position.z);
+            transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+        }
+
+        /// 在传送前调用
+        public void PrepareForTeleport()
+        {
+            // 触发传送前事件
+            OnBeforeTeleport?.Invoke();
+
+            // 重置车辆状态
+            ResetVehicleState();
+        }
+
+        /// 在传送后调用
+        public void FinishTeleport()
+        {
+            // 重置车轮状态
+            if (vehiclePhysics != null)
+            {
+                vehiclePhysics.ResetPhysics();
+            }
+
+            // 触发传送后事件
+            OnAfterTeleport?.Invoke();
+        }
+
+        /// 重置车辆状态
+        private void ResetVehicleState()
+        {
+            // 重置物理状态
+            if (vehicleRigidbody != null)
+            {
+                vehicleRigidbody.linearVelocity = Vector3.zero;
+                vehicleRigidbody.angularVelocity = Vector3.zero;
+            }
+        }
+
+        /// <summary>
+        /// 设置车辆输入 - 统一处理所有输入
+        /// 作为唯一的输入处理接口，简化架构
+        /// </summary>
+        /// <param name="throttleInput">油门输入值</param>
+        /// <param name="brakeInput">制动输入值</param>
+        /// <param name="steeringInput">转向输入值</param>
+        /// <param name="handbrakeInput">手刹输入状态</param>
+        /// <param name="nitroInput">氮气输入状态</param>
+        /// <param name="isDriftingRequested">是否请求漂移</param>
+        public void SetInput(float throttleInput, float brakeInput, float steeringInput, bool handbrakeInput, bool nitroInput, bool isDriftingRequested)
+        {
+            // 更新输入值
+            this.throttleInput = throttleInput;
+            this.brakeInput = brakeInput;
+            this.steeringInput = steeringInput;
+            this.isHandbrakeActive = handbrakeInput; // 保存原始手刹状态
+            this.isNitroActive = nitroInput && currentNitroAmount > 0;
+            this.isDriftingRequested = isDriftingRequested; // 保存漂移请求状态
+
+            // Debug log for input states
+            // Debug.Log($"Input - Throttle: {throttleInput:F2}, Brake: {brakeInput:F2}, Steering: {steeringInput:F2}, Handbrake: {handbrakeInput}, Nitro: {nitroInput}, DriftReq: {isDriftingRequested}");
+        }
+
+        /// <summary>
+        /// 计算油门保留系数 - 基于车速动态调整 (已固定为原后驱逻辑)
+        /// </summary>
+        private float CalculateThrottleRetentionFactor(float speed) // Removed DriveType parameter
+        {
+            // 基础油门保留系数 - 基于车速
+            float speedBasedFactor;
+            if (speed < 30f) {
+                // 低速：较高的油门保留，帮助启动漂移
+                speedBasedFactor = Mathf.Lerp(0.8f, 0.7f, speed / 30f);
+            } else if (speed < 80f) {
+                // 中速：适中的油门保留，平衡漂移和加速
+                speedBasedFactor = Mathf.Lerp(0.7f, 0.5f, (speed - 30f) / 50f);
+            } else {
+                // 高速：较低的油门保留，防止过度加速导致失控
+                speedBasedFactor = Mathf.Lerp(0.5f, 0.3f, Mathf.Min(1f, (speed - 80f) / 60f));
+            }
+
+            // 始终使用原后轮驱动的逻辑
+            return speedBasedFactor; // Removed switch statement
         }
         #endregion
     }

@@ -21,8 +21,8 @@ public class CameraFOVController : MonoBehaviour
     [SerializeField] private float fovSmoothness = 0.2f;
 
     [Header("引用")]
-    [Tooltip("车辆控制器")]
-    [SerializeField] private VehicleController vehicleController;
+    [Tooltip("车辆驱动系统")]
+    [SerializeField] private VehicleDriveSystem vehicleDriveSystem;
 
     // 相机组件
     private Camera cameraComponent;
@@ -48,25 +48,25 @@ public class CameraFOVController : MonoBehaviour
         targetFOV = defaultFOV;
         currentTargetFOV = defaultFOV;
 
-        // 如果没有指定车辆控制器，尝试在场景中查找
-        if (vehicleController == null)
+        // 如果没有指定车辆驱动系统，尝试在场景中查找
+        if (vehicleDriveSystem == null)
         {
-            vehicleController = FindObjectOfType<VehicleController>();
-            if (vehicleController == null)
+            vehicleDriveSystem = FindObjectOfType<VehicleDriveSystem>();
+            if (vehicleDriveSystem == null)
             {
-                Debug.LogWarning("未找到VehicleController，FOV效果将不可用");
+                Debug.LogWarning("未找到VehicleDriveSystem，FOV效果将不可用");
             }
         }
     }
 
     private void Update()
     {
-        if (vehicleController == null) return;
+        if (vehicleDriveSystem == null) return;
 
         // 检查氮气状态和速度
-        bool isNitroActive = vehicleController.IsNitroActive();
-        float currentSpeed = vehicleController.GetCurrentSpeed();
-        float maxSpeed = vehicleController.GetMaxSpeed();
+        bool isNitroActive = vehicleDriveSystem.IsNitroActive();
+        float currentSpeed = vehicleDriveSystem.GetCurrentSpeed();
+        float maxSpeed = vehicleDriveSystem.GetMaxSpeed();
         float speedFactor = Mathf.Clamp01(currentSpeed / maxSpeed);
 
         // 根据氮气状态和速度设置目标FOV

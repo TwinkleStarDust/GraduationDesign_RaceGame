@@ -1,0 +1,163 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Modular Game UI Kit 知识库
+
+## 描述
+知识库是关于 **Modular Game UI Kit** 的文档，它包含了这个 Unity 资产的详细信息，从核心功能到具体组件的使用方法都有介绍。
+
+- 总结资产的核心功能和用途。
+- 梳理资产的基本使用流程和步骤。
+- 详细解释各种 API、类和方法的使用。
+- 说明资产如何与其他 Unity 系统集成。
+- 整理文档中提到的任何代码规范或约定。
+- 为您提供特定组件或功能的配置选项和参数信息。
+- 如果您对某个概念不确定，我可以提供进一步的解释或例子。
+- 我可以指引您到文档中相关的部分。
+- 在回答问题后，我很乐意通过提问来帮助您巩固理解。
+
+## 核心功能与特性 (Core Functions and Features)
+
+Modular Game UI Kit 是一个高级多用途游戏 UI 系统。它提供构建专业、高质量游戏用户界面所需的一切。该资产包含精心设计、专业组织且完全可定制的所有元素。它是一个图形化 UI 包，包含有用的 UI 组件、脚本、图像和动画，可用作您自己游戏的起点。
+
+- **多用途 UI 系统:** 该套件是一个多用途的 UI 系统。
+- **包含完整内容:** 资产包含完整的 C# 源代码，还包含 UI 设计布局、UI 组件、附加 UI 组件、图像和图标符号、动画、手工制作的调色板。
+- **易于构建:** 旨在帮助您轻松构建游戏 UI。
+- **高度可定制:** 所有包含的元素都是完全可定制的。您可以轻松更改背景/按钮的形状和颜色，这些更改将应用于整个项目。使用模块化调色板可以非常轻松快速地尝试不同的颜色组合。
+- **包含完整演示:** 资产包含一个完整的演示项目，您可以将其用作自己游戏的起点。演示项目带有完整的 C# 源代码。
+- **响应式设计基础:** 演示项目通过广泛使用 Unity 的锚点来实现 UI 在多种分辨率下的自动缩放，这对于移动开发特别有用。演示项目已针对横向和纵向屏幕比例设计。
+
+## 基本设置和配置 (Basic Setup and Configuration)
+
+为了使用 Modular Game UI Kit，需要满足特定的 Unity 版本要求和建议的编辑器设置。资产结构也提供了理解和导航内容的方式。
+
+- **Unity 版本要求:** 项目广泛使用了 Unity 最新改进的预制件系统，因此需要 Unity 2022.3.0 LTS 或更高版本。尝试使用低于 2022.3.0 LTS 的 Unity 版本将无法正常工作，并会导致项目中的预制件损坏。
+- **推荐的 Inspector 设置:** 文档建议启用“Use IMGUI Default Inspector”选项，以便获得最佳资产使用体验，因为在 Unity 2022.3.0 LTS 中使用 UI Toolkit 重写的编辑器代码可能存在 Inspector 相关的 bug。您可以在 Edit/Project Settings/Editor 中找到此选项。
+- **资产结构概述:**
+  - `Common`: 包含资产中在演示项目上下文之外通常有用的所有元素。包括动画 (`Common/Animations`)、编辑器 (`Common/Editor`) - 包含调色板、字体 (`Common/Fonts`) - OPL 字体，Inter 字体家族的 Regular 和 SemiBold 变体、材质 (`Common/Materials`) - 用于锁定项目的"GrayTint"材质、预制件 (`Common/Prefabs`) - 分为 Foundations (基础元素)、Components (常用组件)、Layouts (预构建布局) 和 Popups (模块化弹窗)、场景 (`Common/Scenes`) - 包含用于启动项目的起始场景、脚本 (`Common/Scripts`) - 包含完整的 C# 源代码、着色器 (`Common/Shader`) - 用于锁定项目的"GrayTint"着色器、精灵图 (`Common/Sprites`) - 包含演示项目的所有图像、图标、效果和背景。
+  - `Demo`: 包含预构建的、即用的布局，适用于游戏中最流行的类别，如角色、创建角色、公会、制作、每日奖励、好友、主页、游戏中、物品栏、登录、会员、消息、通知、个人资料、任务、排名、奖励、设置、商店、金币和宝石商店、技能、关卡选择。每个文件夹包含其预制件。包括动画 (`Demo/Animations`)、预制件 (`Demo/Prefabs`) - 包含不同类别的预制件，进一步细分为 Items (个体物品)、Layouts (个体布局元素)、Lists (列表)、Panel (面板)、Popups (弹窗)。场景 (`Demo/Scenes`) - 包含横向 (`Main`, `Test`) 和纵向 (`Main-Portrait`, `Test-Portrait`) 的演示场景。
+- **自定义核心视觉元素:**
+  - **颜色调色板:** 套件提供一个手工制作的调色板，包含 40 种和谐搭配的颜色。这使得在更改游戏外观时非常容易选择现成的颜色组合。调色板位于 `Common/Editor` 文件夹。
+  - **按钮形状和颜色:** 可以通过编辑 `Common/Prefabs/2-Components/Base-Button-With-Icon/` 文件夹中的基础按钮预制件内部的内容来更改。可以通过更改 Button-Base 预制件的 Background-Container 来更改按钮的形状 (包括带图标的按钮)。
+  - **背景颜色和形状:** 可以通过编辑 `Common/Prefabs/1-Foundations/` 文件夹中的预制件来更改整个项目的背景颜色或方框的形状。文档列举了不同名称背景容器预制件及其用途 (如 `Background-Container-1-Dark`, `Background-Container-2-Canvas` 等)。套件还提供了一个 9-sliced 的 `Dashed-Outline`。
+  - **圆角半径:** 可以通过更改 Pixels per unit Multiplier 值轻松设置按钮或背景的圆角半径。
+  - **字体颜色:** 可以通过更改位于 `Common/Prefabs/1-Foundations/Label/` 文件夹内的 Label Prefab 来轻松更改字体颜色。这将更改整个项目的字体颜色。
+- **参考分辨率:** 资产使用 1920×1280 的参考分辨率，这在各种宽高比下都效果良好。
+
+## API参考 (API Reference)
+
+该套件在 Unity 内置 UI 功能的基础上提供了额外的有用扩展。完整的 C# 源代码是可用的。
+
+### 核心类和组件 (Core Classes and Components)
+
+套件提供了以下组件，通常通过将它们添加到游戏对象上来使用：
+
+- **SceneTransition:** 提供从一个场景过渡到另一个场景的功能。它执行从当前场景平滑淡出到新场景的逻辑。
+- **Popup:** 提供打开弹窗并使背景变暗的功能。需要添加到弹窗预制件上。需要 Animator 组件用于弹窗动画，以及 Canvas Group 组件用于动画透明度。
+- **PopupOpener:** 用于打开一个弹窗。需要添加到游戏对象 (通常是按钮) 上。它执行在当前场景中通过调用其 `OpenPopup` 方法来打开弹窗的逻辑。资产包含一个弹窗模板 (`Common/Prefabs/3-Layouts/Popup`) 以帮助快速创建新弹窗。
+- **ModularPopup:** 一种通用的、模块化的弹窗类型，在整个演示项目中用于以统一的方式表示许多不同类型的弹窗。其结构使其可以包含或不包含文本、图像以及任意数量的按钮，同时自动调整最终布局。需要 Animator 组件和 Canvas Group 组件。
+- **ModularPopupOpener:** 用于打开一个 ModularPopup。每个属性都是可选的，如果不需要可以留空，弹窗预制件将自动调整其布局。
+- **TabMenu:** 提供一个 Tab 式菜单，允许在不同的、独立的 Tab 内容之间切换。
+- **SelectionSlider:** 允许使用按钮滚动浏览不同的预制件。
+- **TextSelectionSlider:** 一种专门的 SelectionSlider，允许在不同的基于文本的选项之间滚动。
+- **SliderAmountText:** 允许将文本标签与 Slider 的当前进度值关联起来。
+- **SliderColorSwap:** 允许轻松交换任何 Slider 的 Handle 颜色。通常与 ColorSwapper 组件一起使用。
+- **CircularProgressBar:** 提供带圆角的进度条。CircularProgressBarText 组件可以将文本标签与 Slider 的当前进度值关联。
+- **Tooltip:** 允许轻松为任何游戏对象添加工具提示。工具提示本身需要一个 Canvas Group 并将 Alpha 设置为 0。预制的工具提示预制件包含 size fitter 组件。
+- **Gradient:** 一个添加到任何图像上以增加现代风格和额外颜色选项的组件。易于与模块化调色板一起使用。
+
+### 主要方法和属性 (Key Methods and Properties)
+
+组件具有以下重要方法和属性：
+
+- **SceneTransition:**
+  - 属性: 背景颜色 (background color)、持续时间 (duration time)、目标场景名称 (destination scene name)。
+  - 方法: `PerformTransition` - 用于启动场景过渡。可以在代码中调用。
+- **Popup:**
+  - 属性: 背景颜色 (background color)、销毁时间 (destroy time)。
+- **PopupOpener:**
+  - 方法: `OpenPopup` - 用于打开弹窗。
+- **ModularPopupOpener:**
+  - 属性:
+    - `Popup Prefab`: 要打开的弹窗预制件。
+    - `Title`: 标题文本。
+    - `Subtitle`: 副标题文本。
+    - `Message`: 主体文本。
+    - `Image`: 要显示的图像。
+    - `Tint color`: 图像的 Tint 颜色。
+    - `Caption`: 图像的 Caption。
+    - `Buttons`: 要显示的按钮列表。每个按钮有可选的 Label 和 Click Callback。
+    - `Close Popup When Clicked`: 如果启用，点击此按钮将自动关闭弹窗。
+    - `Ignore Button Clicked Event`: 通常应禁用。仅当要打开的模块化弹窗预制件已经定义了自己的"on clicked"事件且不想覆盖它们时才启用。
+- **TabMenu:**
+  - 属性:
+    - `Tab On Group`: 激活的标签游戏对象。
+    - `Tab Off Group`: 非激活的标签游戏对象。
+    - `Content`: 用作每个 Tab 内容的预制件。
+    - `Root`: 可选的父级游戏对象，用于附加每个 Tab 的内容。
+- **SelectionSlider:**
+  - 属性: `Prefab Root (GameObject)` - 可选的 Root 游戏对象，用于在特定位置或大小加载预制件。
+- **TextSelectionSlider:**
+  - 属性:
+    - `Options`: 包含所有可用选项的列表，每个选项都是一个字符串。
+    - `Option Text`: 显示当前选定选项的关联 TextMesh Pro 标签。
+- **SliderAmountText:**
+  - 属性: 可以指定要使用的后缀 (如果需要)，并指定数字是否应为整数。
+- **Tooltip:**
+  - 属性: 淡入时间 (fade time) - 弹出工具提示的淡入持续时间 (秒)。
+- **CircularProgressBarText:**
+  - 功能: 允许将文本标签与 Slider 的当前进度值关联。
+
+### 事件和回调 (Events and Callbacks)
+
+文档中提到了与组件交互的事件和回调：
+
+- **按钮点击:** 可以通过将 `SceneTransition` 的 `PerformTransition` 方法调用到按钮上，或者将 `PopupOpener` 的 `OpenPopup` 方法调用到按钮上 来响应按钮点击。
+- **ModularPopup 按钮回调:** ModularPopupOpener 的 `Buttons` 属性中的每个按钮都有一个可选的 Click Callback。ModularPopup 预制件本身可以定义自己的"on clicked"事件。
+
+### 配置选项和参数 (Configuration Options and Parameters)
+
+除了上述组件特定的属性外，还有一些通用的配置选项：
+
+- **Canvas 设置:** 演示场景中的 Canvas 渲染模式设置为 Screen Space – Camera。Canvas Scaler 的缩放模式设置为 Scale With Screen Size。
+- **锚点使用:** 广泛使用锚点定位 UI 元素，以实现 UI 在多种分辨率下的自动缩放。
+- **布局组:** 演示项目在横向使用 Horizontal Layout Group，纵向使用 Vertical Layout Group 用于面板布局。
+- **自定义颜色:** 可以通过编辑 `Common/Prefabs/1-Foundations` 中的预制件来更改背景颜色，也可以使用提供的调色板选择颜色。Gradient 组件可以增加额外的颜色选项。
+- **自定义字体:** 可以通过更改 Label Prefab (`Common/Prefabs/1-Foundations/Label/`) 来更改整个项目的字体颜色。套件使用 OPL 字体，Inter 字体家族的 Regular 和 SemiBold 变体。
+- **自定义形状:** 可以通过更改预制件 (如 Button-Base 或 Background-Container) 的内容来更改按钮或背景的形状。
+- **SceneTransition 参数:** 可以配置过渡的背景颜色、持续时间、目标场景名称。
+- **Popup 参数:** 可以配置背景颜色和销毁时间。
+- **ModularPopupOpener 参数:** 可以通过设置其属性来自定义弹窗的内容，包括标题、副标题、消息、图像、Tint 颜色、Caption、按钮列表以及是否在点击后关闭。
+- **TabMenu 参数:** 可以配置 Tab 的激活/非激活标签组、内容预制件和可选的 Root 父级游戏对象。
+- **TextSelectionSlider 参数:** 可以配置选项列表和显示选项的 TextMesh Pro 标签。
+- **SliderAmountText 参数:** 可以配置后缀和数字是否为整数。
+- **Tooltip 参数:** 可以配置淡入时间。可以为 Tooltip GameObject 添加 Canvas 组件并激活 Override Sorting 来保持其在 UI 上层。
+
+## 与其他Unity系统的集成 (Integration with Other Unity Systems)
+
+Modular Game UI Kit 与 Unity 的许多内置系统紧密集成：
+
+- **Unity UI System:** 该资产是使用 Unity 内置的 UI 系统实现的，并且是基于其功能的。
+- **Canvas:** 演示项目的所有场景都使用 Unity 的 Canvas 来显示内容。Canvas 的渲染模式和 Canvas Scaler 都进行了配置。
+- **Prefabs:** 资产大量使用了 Unity 的预制件系统。UI 元素、布局和组件都组织成预制件。可以轻松替换预制件。
+- **Animator:** Popup 和 ModularPopup 需要 Animator 组件来实现动画效果。
+- **Canvas Group:** Popup 和 ModularPopup 需要 Canvas Group 组件来实现动画的透明度效果。Tooltip 也需要 Canvas Group 并设置 Alpha 为 0。
+- **Layout Groups:** 演示项目利用 Layout Groups (如 Horizontal Layout Group 和 Vertical Layout Group) 来管理 UI 元素的布局。
+- **Anchors:** 广泛使用锚点来定位和缩放 UI 元素。
+- **Build Settings:** 需要将您想要通过 SceneTransition 打开的场景添加到 Build Settings 中。
+- **TextMesh Pro:** TextSelectionSlider 组件与 TextMesh Pro 标签关联以显示文本选项。
+- **Size Fitter:** 预制的 Tooltip 预制件包含 Size Fitter 组件，使其窗口大小自动适应内容。
+- **Renderer Sorting:** 可以通过为 Tooltip GameObject 添加 Canvas 组件并激活 Override Sorting 来控制其渲染顺序，使其保持在 UI 上层。
+- **Inspector:** 推荐更改 Inspector 设置以获得最佳体验。
+
+## 代码规范和约定 (Code Standards and Conventions)
+
+Modular Game UI Kit 包含完整的 C# 源代码。
+
+- **源代码可用:** 完整的 C# 源代码是提供的。
+- **作为参考:** 虽然源代码不打算成为一个通用的框架，但它在学习如何使用 Unity 内置 UI 系统实现游戏 UI 方面可以是一个非常有用的参考。
+
+
+文档中并未明确列出具体的代码规范、命名约定或格式指南。然而，由于提供了完整的源代码，您可以参考其中的实现方式和风格。

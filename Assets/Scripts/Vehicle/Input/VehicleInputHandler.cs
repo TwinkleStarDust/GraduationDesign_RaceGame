@@ -9,36 +9,14 @@ namespace Vehicle
     public class VehicleInputHandler : MonoBehaviour
     {
         [Header("引用设置")]
-        [Tooltip("车辆控制器引用")]
-        [SerializeField] private VehicleController vehicleController;
-
         [Tooltip("车辆驱动系统引用")]
         [SerializeField] private VehicleDriveSystem vehicleDriveSystem;
-
-        [Header("输入设置")]
-        [Tooltip("是否使用键盘输入")]
-        [SerializeField] private bool useKeyboardInput = true;
-
-        [Tooltip("输入平滑度 (值越小响应越快)")]
-        [Range(0.01f, 0.5f)]
-        [SerializeField] private float inputSmoothFactor = 0.1f;
-
-        [Tooltip("是否启用渐进式油门/刹车控制")]
-        [SerializeField] private bool useProgressiveThrottle = true;
-
-        [Tooltip("油门/刹车增加速率")]
-        [Range(0.5f, 5.0f)]
-        [SerializeField] private float throttleIncreaseRate = 2.0f;
-
-        [Tooltip("油门/刹车减少速率")]
-        [Range(0.5f, 5.0f)]
-        [SerializeField] private float throttleDecreaseRate = 3.0f;
 
         [Header("键盘按键映射")]
         [Tooltip("油门键")]
         [SerializeField] private KeyCode accelerateKey = KeyCode.W;
 
-        [Tooltip("刹车/倒车键")]
+        [Tooltip("刹车/倒车键 - 用于减速和倒车，均匀制动所有车轮")]
         [SerializeField] private KeyCode brakeKey = KeyCode.S;
 
         [Tooltip("左转向键")]
@@ -47,7 +25,7 @@ namespace Vehicle
         [Tooltip("右转向键")]
         [SerializeField] private KeyCode rightKey = KeyCode.D;
 
-        [Tooltip("手刹键")]
+        [Tooltip("手刹键 - 用于漂移控制，主要制动后轮")]
         [SerializeField] private KeyCode handbrakeKey = KeyCode.Space;
 
         [Tooltip("重置车辆键")]
@@ -62,37 +40,29 @@ namespace Vehicle
         private float steeringInput;
         private bool handbrakeInput;
         private bool nitroInput;
+        private bool isDriftingRequested;
 
         // 目标输入值（用于平滑过渡）
         private float targetThrottleInput;
         private float targetBrakeInput;
         private float targetSteeringInput;
 
+        // 平滑过渡系数
+        private const float SMOOTH_FACTOR = 10f;
+        private const float THROTTLE_RATE = 2.0f;
+
         /// <summary>
         /// 初始化组件
         /// </summary>
         private void Start()
         {
-            // 如果没有指定车辆控制器，尝试获取
-            if (vehicleController == null)
-            {
-                vehicleController = GetComponent<VehicleController>();
-            }
-
             // 如果没有指定车辆驱动系统，尝试获取
             if (vehicleDriveSystem == null)
             {
                 vehicleDriveSystem = GetComponent<VehicleDriveSystem>();
             }
 
-            // 检查组件是否存在
-            if (vehicleController == null)
-            {
-                Debug.LogError("【车辆输入】未找到VehicleController组件！请检查Inspector中的引用。");
-                this.enabled = false;
-                return;
-            }
-
+            // 检查车辆驱动系统是否存在
             if (vehicleDriveSystem == null)
             {
                 Debug.LogError("【车辆输入】未找到VehicleDriveSystem组件！请检查Inspector中的引用。");
@@ -100,7 +70,7 @@ namespace Vehicle
                 return;
             }
 
-            Debug.Log("【车辆输入】初始化完成。使用" + (useKeyboardInput ? "键盘输入" : "新输入系统") + "。");
+            Debug.Log("【车辆输入】初始化完成。使用键盘输入。");
         }
 
         /// <summary>
@@ -108,21 +78,14 @@ namespace Vehicle
         /// </summary>
         private void Update()
         {
-            if (useKeyboardInput)
-            {
-                HandleKeyboardInput();
-            }
-
-            // 平滑过渡输入值
+            HandleKeyboardInput();
             SmoothInputs();
-
-            // 应用输入到车辆驱动系统
             ApplyInput();
 
             // 重置车辆
             if (Input.GetKeyDown(resetKey))
             {
-                vehicleController.ResetVehicle();
+                vehicleDriveSystem.ResetVehicle();
             }
         }
 
@@ -131,42 +94,30 @@ namespace Vehicle
         /// </summary>
         private void HandleKeyboardInput()
         {
-            if (useProgressiveThrottle)
+            // 渐进式油门控制
+            if (Input.GetKey(accelerateKey))
             {
-                // 渐进式油门控制
-                if (Input.GetKey(accelerateKey))
-                {
-                    targetThrottleInput = Mathf.MoveTowards(targetThrottleInput, 1.0f, Time.deltaTime * throttleIncreaseRate);
-                }
-                else
-                {
-                    targetThrottleInput = Mathf.MoveTowards(targetThrottleInput, 0.0f, Time.deltaTime * throttleDecreaseRate);
-                }
-
-                // 渐进式刹车控制
-                if (Input.GetKey(brakeKey))
-                {
-                    targetBrakeInput = Mathf.MoveTowards(targetBrakeInput, 1.0f, Time.deltaTime * throttleIncreaseRate);
-                }
-                else
-                {
-                    targetBrakeInput = Mathf.MoveTowards(targetBrakeInput, 0.0f, Time.deltaTime * throttleDecreaseRate);
-                }
+                targetThrottleInput = Mathf.MoveTowards(targetThrottleInput, 1.0f, Time.deltaTime * THROTTLE_RATE);
             }
             else
             {
-                // 直接油门控制（老方式，但更加灵敏）
-                targetThrottleInput = Input.GetKey(accelerateKey) ? 1.0f : 0.0f;
-                targetBrakeInput = Input.GetKey(brakeKey) ? 1.0f : 0.0f;
+                targetThrottleInput = Mathf.MoveTowards(targetThrottleInput, 0.0f, Time.deltaTime * THROTTLE_RATE);
+            }
+
+            // 渐进式刹车控制
+            if (Input.GetKey(brakeKey))
+            {
+                targetBrakeInput = Mathf.MoveTowards(targetBrakeInput, 1.0f, Time.deltaTime * THROTTLE_RATE);
+            }
+            else
+            {
+                targetBrakeInput = Mathf.MoveTowards(targetBrakeInput, 0.0f, Time.deltaTime * THROTTLE_RATE);
             }
 
             // 处理转向输入
             targetSteeringInput = 0.0f;
             if (Input.GetKey(leftKey)) targetSteeringInput -= 1.0f;
             if (Input.GetKey(rightKey)) targetSteeringInput += 1.0f;
-
-            // 注意：手刹输入在ApplyInput()中直接处理，确保立即响应
-            // 这里不再设置handbrakeInput
 
             // 处理氮气输入
             nitroInput = Input.GetKey(nitroKey);
@@ -178,79 +129,13 @@ namespace Vehicle
         private void SmoothInputs()
         {
             // 平滑过渡油门输入
-            throttleInput = Mathf.Lerp(throttleInput, targetThrottleInput, inputSmoothFactor / Time.deltaTime);
+            throttleInput = Mathf.Lerp(throttleInput, targetThrottleInput, Time.deltaTime * SMOOTH_FACTOR);
 
             // 平滑过渡刹车输入
-            brakeInput = Mathf.Lerp(brakeInput, targetBrakeInput, inputSmoothFactor / Time.deltaTime);
+            brakeInput = Mathf.Lerp(brakeInput, targetBrakeInput, Time.deltaTime * SMOOTH_FACTOR);
 
             // 平滑过渡转向输入
-            steeringInput = Mathf.Lerp(steeringInput, targetSteeringInput, inputSmoothFactor / Time.deltaTime);
-        }
-
-        /// <summary>
-        /// 处理新输入系统的油门输入
-        /// </summary>
-        public void OnThrottle(InputValue value)
-        {
-            if (!useKeyboardInput)
-            {
-                targetThrottleInput = value.Get<float>();
-            }
-        }
-
-        /// <summary>
-        /// 处理新输入系统的转向输入
-        /// </summary>
-        public void OnSteer(InputValue value)
-        {
-            if (!useKeyboardInput)
-            {
-                targetSteeringInput = value.Get<float>();
-            }
-        }
-
-        /// <summary>
-        /// 处理新输入系统的刹车输入
-        /// </summary>
-        public void OnBrake(InputValue value)
-        {
-            if (!useKeyboardInput)
-            {
-                targetBrakeInput = value.Get<float>();
-            }
-        }
-
-        /// <summary>
-        /// 处理新输入系统的手刹输入
-        /// </summary>
-        public void OnHandbrake(InputValue value)
-        {
-            if (!useKeyboardInput)
-            {
-                handbrakeInput = value.isPressed;
-            }
-        }
-
-        /// <summary>
-        /// 处理新输入系统的重置输入
-        /// </summary>
-        public void OnReset(InputValue value)
-        {
-            if (value.isPressed)
-            {
-                vehicleController.ResetVehicle();
-            }
-        }
-
-        /// <summary>
-        /// 处理新输入系统的氮气输入
-        /// </summary>
-        public void OnNitro(InputValue value)
-        {
-            if (!useKeyboardInput)
-            {
-                nitroInput = value.isPressed;
-            }
+            steeringInput = Mathf.Lerp(steeringInput, targetSteeringInput, Time.deltaTime * SMOOTH_FACTOR);
         }
 
         /// <summary>
@@ -258,77 +143,28 @@ namespace Vehicle
         /// </summary>
         private void ApplyInput()
         {
-            // 如果车辆驱动系统不存在，返回
-            if (vehicleDriveSystem == null) return;
-
-            // 处理W+S同时按下的情况 - 允许油门和刹车同时存在，实现强力制动
-            // 但刹车优先级更高，降低油门效果
-            if (throttleInput > 0.01f && brakeInput > 0.01f)
-            {
-                // W+S同时按下时，降低油门效果但保留一些油门输入
-                // 这将使车辆保持一定引擎转速但同时有明显的减速效果
-                float reducedThrottle = throttleInput * 0.3f; // 只保留30%的油门
-                vehicleDriveSystem.SetThrottleInput(reducedThrottle);
-                vehicleDriveSystem.SetBrakeInput(brakeInput * 1.5f); // 增强刹车效果
-            }
-            // 单独按刹车键
-            else if (brakeInput > 0.01f)
-            {
-                vehicleDriveSystem.SetThrottleInput(0);
-                vehicleDriveSystem.SetBrakeInput(brakeInput);
-            }
-            // 单独按油门键
-            else
-            {
-                vehicleDriveSystem.SetThrottleInput(throttleInput);
-                vehicleDriveSystem.SetBrakeInput(0);
-            }
-
-            // 处理手刹键按下情况，允许油门和手刹同时存在
-            // 手刹与油门共存时应该提供明显的减速和漂移效果
-            // 手刹输入不进行平滑处理，确保立即响应
+            // 获取当前手刹状态
             bool currentHandbrakeInput = Input.GetKey(handbrakeKey);
+
+            // 计算是否满足漂移条件
+            isDriftingRequested = currentHandbrakeInput && Mathf.Abs(steeringInput) > 0.1f;
 
             // 如果手刹状态发生变化，立即应用
             if (currentHandbrakeInput != handbrakeInput)
             {
                 handbrakeInput = currentHandbrakeInput;
-
-                // 立即应用手刹状态变化
                 vehicleDriveSystem.SetHandbrakeActive(handbrakeInput);
             }
 
-            if (handbrakeInput)
-            {
-                // 如果是W+空格同时按下，应保留漂移效果但有明显的减速
-                // 如果同时有油门输入，减弱油门效果以模拟现实中的制动情况
-                if (throttleInput > 0.1f)
-                {
-                    // 已经在SetThrottleInput时设置了油门，这里不需要重复设置
-                    // 但告诉驱动系统这是"带油门的手刹"状态
-                    vehicleDriveSystem.SetBrakingWithThrottle(true);
-                }
-                else
-                {
-                    vehicleDriveSystem.SetBrakingWithThrottle(false);
-                }
-            }
-            else
-            {
-                vehicleDriveSystem.SetBrakingWithThrottle(false);
-            }
-
-            // 应用转向
-            vehicleDriveSystem.SetSteeringInput(steeringInput);
-
-            // 应用氮气
-            vehicleDriveSystem.SetNitroActive(nitroInput);
-
-            // 调试信息
-            if (Debug.isDebugBuild && Input.GetKey(KeyCode.BackQuote))
-            {
-                Debug.Log($"油门: {throttleInput:F2} | 刹车: {brakeInput:F2} | 转向: {steeringInput:F2} | 手刹: {handbrakeInput}");
-            }
+            // 将所有输入传递给驱动系统
+            vehicleDriveSystem.SetInput(
+                throttleInput,
+                brakeInput,
+                steeringInput,
+                handbrakeInput,
+                nitroInput,
+                isDriftingRequested
+            );
         }
 
         /// <summary>
