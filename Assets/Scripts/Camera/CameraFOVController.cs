@@ -1,10 +1,10 @@
 using UnityEngine;
-using Vehicle;
+// Removed: using Vehicle; // No longer needed if CarController is in global namespace or its own
 
-
+/// <summary>
 /// 相机FOV控制器
 /// 用于在氮气加速时增大FOV，增强加速感
-
+/// </summary>
 public class CameraFOVController : MonoBehaviour
 {
     [Header("FOV设置")]
@@ -14,23 +14,28 @@ public class CameraFOVController : MonoBehaviour
     [Tooltip("氮气加速时的最大FOV值")]
     [SerializeField] private float nitroFOV = 70f;
 
-    [Tooltip("FOV变化速度")]
-    [SerializeField] private float fovChangeSpeed = 3f;
+    [Tooltip("FOV达到目标值所需的平滑时间（秒）")] // Changed Tooltip for clarity with SmoothDamp
+    [SerializeField] private float fovSmoothTime = 0.3f; // Renamed from fovChangeSpeed & fovSmoothness
 
-    [Tooltip("FOV平滑度")]
-    [SerializeField] private float fovSmoothness = 0.2f;
+    // Removed fovSmoothness as we'll primarily use fovSmoothTime with SmoothDamp
 
     [Header("引用")]
-    [Tooltip("车辆控制器")]
-    [SerializeField] private VehicleController vehicleController;
+    // [Tooltip("车辆控制器脚本实例")] // 移除或注释掉这个SerializeField
+    // [SerializeField] private CarController targetCarController;
+    private CarController targetCarController; // 改为私有
+
+    // 公共属性
+    public float DefaultFOV => defaultFOV;
+    public float NitroFOV => nitroFOV;
+    public float CurrentFOV => cameraComponent ? cameraComponent.fieldOfView : defaultFOV;
 
     // 相机组件
     private Camera cameraComponent;
 
     // 目标FOV值
-    private float targetFOV;
-    private float currentTargetFOV;
+    private float targetFOVForSmoothing; // Renamed from targetFOV to avoid confusion with the local targetFOV in Update
     private float velocityFOV = 0f;
+    // Removed currentTargetFOV as SmoothDamp handles the current value internally and updates it via ref velocity
 
     private void Awake()
     {
@@ -45,57 +50,73 @@ public class CameraFOVController : MonoBehaviour
 
         // 设置初始FOV
         cameraComponent.fieldOfView = defaultFOV;
-        targetFOV = defaultFOV;
-        currentTargetFOV = defaultFOV;
+        targetFOVForSmoothing = defaultFOV;
 
-        // 如果没有指定车辆控制器，尝试在场景中查找
-        if (vehicleController == null)
+        // 自动获取带有 "Player" 标签的车辆的 CarController
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
         {
-            vehicleController = FindObjectOfType<VehicleController>();
-            if (vehicleController == null)
+            targetCarController = playerObject.GetComponent<CarController>();
+            if (targetCarController == null)
             {
-                Debug.LogWarning("未找到VehicleController，FOV效果将不可用");
+                Debug.LogWarning("CameraFOVController: 在带有 'Player' 标签的对象上未找到 CarController 组件! FOV效果可能受影响。", this);
             }
+        }
+        else
+        {
+            Debug.LogWarning("CameraFOVController: 未在场景中找到带有 'Player' 标签的游戏对象! FOV效果可能受影响。", this);
         }
     }
 
     private void Update()
     {
-        if (vehicleController == null) return;
+        if (cameraComponent == null) return; // Should not happen if Awake succeeded
 
-        // 检查氮气状态和速度
-        bool isNitroActive = vehicleController.IsNitroActive();
-        float currentSpeed = vehicleController.GetCurrentSpeed();
-        float maxSpeed = vehicleController.GetMaxSpeed();
-        float speedFactor = Mathf.Clamp01(currentSpeed / maxSpeed);
+        float calculatedTargetFOV = defaultFOV;
 
-        // 根据氮气状态和速度设置目标FOV
-        if (isNitroActive)
+        if (targetCarController != null && targetCarController.IsNitroSystemEnabled) // 使用新的属性 IsNitroSystemEnabled
         {
-            // 根据速度因子计算FOV增量，速度越快FOV增加越多
-            float speedFactorCurved = speedFactor * speedFactor;
-            float fovIncrease = Mathf.Lerp(0, nitroFOV - defaultFOV, speedFactorCurved);
-            targetFOV = defaultFOV + fovIncrease;
-        }
-        else
-        {
-            // 当速度超过最大速度的70%时，也稍微增加FOV
-            if (speedFactor > 0.7f)
+            bool isNitroActive = targetCarController.IsNitroActiveAndEnabled; // 使用新的属性 IsNitroActiveAndEnabled
+            float currentSpeedMS = targetCarController.GetCurrentForwardSpeedMS();
+            float maxSpeedKPH = targetCarController.TargetEngineSpeedKPH; // 使用新的属性 TargetEngineSpeedKPH
+            float maxSpeedMS = maxSpeedKPH / 3.6f; // Convert to M/S for consistent comparison
+
+            float speedFactor = 0f;
+            if (maxSpeedMS > 0.01f) // Avoid division by zero
             {
-                float highSpeedFactor = (speedFactor - 0.7f) / 0.3f;
-                float highSpeedFactorCurved = highSpeedFactor * highSpeedFactor;
-                float highSpeedFovIncrease = Mathf.Lerp(0, (nitroFOV - defaultFOV) * 0.4f, highSpeedFactorCurved);
-                targetFOV = defaultFOV + highSpeedFovIncrease;
+                speedFactor = Mathf.Clamp01(currentSpeedMS / maxSpeedMS);
+            }
+
+            // 根据氮气状态和速度设置目标FOV
+            if (isNitroActive)
+            {
+                // 根据速度因子计算FOV增量，速度越快FOV增加越多
+                float speedFactorCurved = speedFactor * speedFactor; // Simple squaring for non-linear response
+                float fovIncrease = Mathf.Lerp(0, nitroFOV - defaultFOV, speedFactorCurved);
+                calculatedTargetFOV = defaultFOV + fovIncrease;
             }
             else
             {
-                targetFOV = defaultFOV;
+                // 当速度超过最大速度的70%时，也稍微增加FOV
+                if (speedFactor > 0.7f)
+                {
+                    float highSpeedFactor = (speedFactor - 0.7f) / 0.3f; // Normalize 0.7-1.0 range to 0-1
+                    float highSpeedFactorCurved = highSpeedFactor * highSpeedFactor;
+                    float highSpeedFovIncrease = Mathf.Lerp(0, (nitroFOV - defaultFOV) * 0.4f, highSpeedFactorCurved); // Max 40% of nitro FOV increase
+                    calculatedTargetFOV = defaultFOV + highSpeedFovIncrease;
+                }
+                else
+                {
+                    calculatedTargetFOV = defaultFOV;
+                }
             }
         }
-
-        // 双重平滑处理
-        currentTargetFOV = Mathf.SmoothDamp(currentTargetFOV, targetFOV, ref velocityFOV, fovSmoothness);
-
-        cameraComponent.fieldOfView = Mathf.Lerp(cameraComponent.fieldOfView, currentTargetFOV, Time.deltaTime * fovChangeSpeed);
+        else // If no CarController or nitro system disabled, revert to default FOV
+        {
+            calculatedTargetFOV = defaultFOV;
+        }
+        
+        // 使用SmoothDamp平滑FOV变化
+        cameraComponent.fieldOfView = Mathf.SmoothDamp(cameraComponent.fieldOfView, calculatedTargetFOV, ref velocityFOV, fovSmoothTime);
     }
 }

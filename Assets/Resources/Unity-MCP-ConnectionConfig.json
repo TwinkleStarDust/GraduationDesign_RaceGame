@@ -1,0 +1,6 @@
+{
+    "host": "http://localhost:60606",
+    "port": 60606,
+    "keepConnected": false,
+    "logLevel": 1
+}

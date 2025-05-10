@@ -2,14 +2,15 @@ using UnityEngine;
 
 namespace Vehicle
 {
-    
+
     /// 车辆相机控制器
     /// 负责跟随车辆并提供平滑的相机运动
-    
+
     public class VehicleCamera : MonoBehaviour
     {
-        [Tooltip("目标车辆")]
-        [SerializeField] private Transform target;
+        // [Tooltip("目标车辆")] // 不再需要公开的 Transform target 来获取 CarController
+        // [SerializeField] private Transform target;
+        private Transform m_TargetTransform; // 我们仍然需要Transform来定位，但会从CarController获取
 
         [Header("跟随设置")]
         [Tooltip("相机距离")]
@@ -70,7 +71,7 @@ namespace Vehicle
         // 私有变量
         private Vector3 currentVelocity;
         private float currentRotationAngle = 0;
-        private VehicleController vehicleController;
+        private CarController m_TargetCarController;
 
         // 环绕视角相关变量
         private float orbitX = 0f;
@@ -79,38 +80,48 @@ namespace Vehicle
         private CursorLockMode previousCursorLockState;
         private bool previousCursorVisible;
 
-        
+
         /// 初始化组件
-        
+
         private void Start()
         {
-            // 如果没有指定目标，尝试查找场景中的车辆
-            if (target == null)
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            if (playerObject != null)
             {
-                var vehicle = FindObjectOfType<VehicleController>();
-                if (vehicle != null)
+                m_TargetCarController = playerObject.GetComponent<CarController>();
+                if (m_TargetCarController != null)
                 {
-                    target = vehicle.transform;
-                    vehicleController = vehicle;
+                    m_TargetTransform = playerObject.transform; // 获取车辆的 Transform
                 }
                 else
                 {
-                    Debug.LogError("未找到车辆目标！");
+                    Debug.LogError("VehicleCamera: 在带有 'Player' 标签的对象上未找到 CarController 组件!", this);
+                    enabled = false;
+                    return;
                 }
             }
             else
             {
-                vehicleController = target.GetComponent<VehicleController>();
+                Debug.LogError("VehicleCamera: 未在场景中找到带有 'Player' 标签的游戏对象!", this);
+                enabled = false;
+                return;
             }
 
-            // 初始化相机位置
-            if (target != null)
+            // 初始化相机位置，使用 m_TargetTransform
+            if (m_TargetTransform != null)
             {
                 UpdateCameraPosition(true);
             }
 
-            // 初始化环绕视角
-            orbitX = target.eulerAngles.y;
+            // 初始化环绕视角，使用 m_TargetTransform
+            if (m_TargetTransform != null) 
+            {
+                orbitX = m_TargetTransform.eulerAngles.y;
+            }
+            else // 如果 m_TargetTransform 仍然是 null (理论上不应该发生，因为上面有检查)
+            {
+                orbitX = 0f; 
+            }
             orbitY = 10f; // 初始仰角
             orbitOffset = new Vector3(0, orbitHeightOffset, 0);
 
@@ -119,12 +130,12 @@ namespace Vehicle
             previousCursorVisible = Cursor.visible;
         }
 
-        
+
         /// 更新相机位置
-        
+
         private void LateUpdate()
         {
-            if (target == null) return;
+            if (m_TargetTransform == null) return; // 使用 m_TargetTransform 进行检查
 
             // 检查视角切换
             if (enableViewSwitch && Input.GetKeyDown(switchViewKey))
@@ -148,9 +159,9 @@ namespace Vehicle
             UpdateCameraPosition(false);
         }
 
-        
+
         /// 更新相机位置
-        
+
         private void UpdateCameraPosition(bool immediate)
         {
             switch (currentViewMode)
@@ -167,16 +178,16 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新第一人称视角
-        
+
         private void UpdateFirstPersonView(bool immediate)
         {
             // 计算目标位置
-            Vector3 targetPosition = target.TransformPoint(firstPersonOffset);
+            Vector3 targetPosition = m_TargetTransform.TransformPoint(firstPersonOffset); // 使用 m_TargetTransform
 
             // 计算目标旋转
-            Quaternion targetRotation = target.rotation;
+            Quaternion targetRotation = m_TargetTransform.rotation; // 使用 m_TargetTransform
 
             // 设置相机位置和旋转
             if (immediate)
@@ -192,18 +203,18 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新第三人称视角
-        
+
         private void UpdateThirdPersonView(bool immediate)
         {
             // 获取车辆速度和氮气状态
             float speed = 0;
             bool isNitroActive = false;
-            if (vehicleController != null)
+            if (m_TargetCarController != null)
             {
-                speed = vehicleController.GetCurrentSpeed();
-                isNitroActive = vehicleController.IsNitroActive();
+                speed = m_TargetCarController.GetCurrentForwardSpeedMS();
+                isNitroActive = m_TargetCarController.IsNitroActiveAndEnabled;
             }
 
             // 根据车辆速度调整相机跟随平滑度
@@ -223,11 +234,11 @@ namespace Vehicle
             float rotationFactor = Mathf.Lerp(0.5f, 0.8f, speedFactor) * nitroSmoothnessFactor;
 
             // 计算目标位置
-            Vector3 targetPosition = target.position;
+            Vector3 targetPosition = m_TargetTransform.position; // 使用 m_TargetTransform
             targetPosition.y += height;
 
             // 计算相机旋转角度 - 使用更平滑的过渡
-            currentRotationAngle = Mathf.LerpAngle(currentRotationAngle, target.eulerAngles.y, Time.deltaTime * rotationSpeed * rotationFactor);
+            currentRotationAngle = Mathf.LerpAngle(currentRotationAngle, m_TargetTransform.eulerAngles.y, Time.deltaTime * rotationSpeed * rotationFactor); // 使用 m_TargetTransform
 
             // 计算相机位置
             Vector3 direction = Quaternion.Euler(0, currentRotationAngle, 0) * Vector3.back;
@@ -237,7 +248,7 @@ namespace Vehicle
             if (immediate)
             {
                 transform.position = desiredPosition;
-                transform.LookAt(targetPosition);
+                transform.LookAt(targetPosition); // LookAt 内部会使用 m_TargetTransform.position
             }
             else
             {
@@ -259,60 +270,45 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 更新环绕视角（鼠标控制）
-        
+
         private void UpdateOrbitView(bool immediate)
         {
-            // 获取鼠标输入
-            float mouseXInput = Input.GetAxis("Mouse X") * mouseSensitivityX;
-            float mouseYInput = Input.GetAxis("Mouse Y") * mouseSensitivityY;
-
-            // 更新环绕角度
-            orbitX += mouseXInput;
-            orbitY -= mouseYInput; // 反转Y轴，向上移动鼠标使视角向上
-
-            // 限制垂直视角范围
+            orbitX += Input.GetAxis("Mouse X") * mouseSensitivityX;
+            orbitY -= Input.GetAxis("Mouse Y") * mouseSensitivityY;
             orbitY = Mathf.Clamp(orbitY, minVerticalAngle, maxVerticalAngle);
 
-            // 计算目标中心点（车辆位置加上高度偏移）
-            Vector3 targetCenter = target.position + new Vector3(0, orbitHeightOffset, 0);
-
-            // 计算相机旋转
             Quaternion rotation = Quaternion.Euler(orbitY, orbitX, 0);
+            Vector3 position = rotation * new Vector3(0.0f, 0.0f, -orbitDistance) + m_TargetTransform.position + orbitOffset; // 使用 m_TargetTransform
 
-            // 计算相机位置（从目标点向外偏移一定距离）
-            Vector3 negDistance = new Vector3(0, 0, -orbitDistance);
-            Vector3 desiredPosition = targetCenter + rotation * negDistance;
-
-            // 设置相机位置和旋转
             if (immediate)
             {
-                transform.position = desiredPosition;
+                transform.position = position;
                 transform.rotation = rotation;
             }
             else
             {
                 // 平滑过渡
-                transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref currentVelocity, 1.0f / smoothness);
+                transform.position = Vector3.SmoothDamp(transform.position, position, ref currentVelocity, 1.0f / smoothness);
                 transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * smoothness);
             }
 
             // 确保相机始终看向目标中心点
-            transform.LookAt(targetCenter);
+            transform.LookAt(m_TargetTransform.position);
         }
 
-        
+
         /// 获取当前视角模式
-        
+
         public CameraViewMode GetCurrentViewMode()
         {
             return currentViewMode;
         }
 
-        
+
         /// 设置视角模式
-        
+
         public void SetViewMode(CameraViewMode mode)
         {
             // 如果从环绕模式切换出去，恢复鼠标状态
@@ -326,7 +322,7 @@ namespace Vehicle
             // 如果切换到环绕模式，初始化环绕角度并隐藏鼠标
             if (mode == CameraViewMode.OrbitControl)
             {
-                orbitX = target.eulerAngles.y;
+                orbitX = m_TargetTransform.eulerAngles.y;
                 orbitY = 10f;
 
                 if (hideCursorInMouseMode)
@@ -342,9 +338,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 恢复鼠标状态
-        
+
         private void RestoreCursorState()
         {
             if (hideCursorInMouseMode)
@@ -355,9 +351,9 @@ namespace Vehicle
             }
         }
 
-        
+
         /// 当脚本被禁用或销毁时调用
-        
+
         private void OnDisable()
         {
             // 确保恢复鼠标状态

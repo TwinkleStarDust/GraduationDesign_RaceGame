@@ -1,0 +1,255 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 赛车游戏代码规范和最佳实践
+
+## 代码风格
+
+### 命名约定
+
+- **类名和结构体**: 使用PascalCase (例如: `VehicleController`)
+- **私有字段**: 前缀`m_`加上camelCase (例如: `m_enginePower`)
+- **常量**: 前缀`c_`加上PascalCase (例如: `c_MaxSpeed`)
+- **静态字段**: 前缀`s_`加上PascalCase (例如: `s_Instance`)
+- **方法**: 使用PascalCase (例如: `CalculateSpeed()`)
+- **参数**: 前缀`_`加上camelCase (例如: `_currentSpeed`)
+- **临时变量**: 使用camelCase (例如: `tempPosition`)
+- **属性**: 使用PascalCase (例如: `CurrentSpeed`)
+- **接口**: 前缀`I`加上PascalCase (例如: `IControllable`)
+
+### 代码结构
+
+使用#region组织代码，按照以下顺序排列：
+
+```csharp
+public class ExampleClass : MonoBehaviour
+{
+    #region 常量
+    private const int c_MaxItems = 100;
+    #endregion
+
+    #region 序列化字段
+    [SerializeField] private float m_MaxSpeed = 200f;
+    [SerializeField, Range(0f, 1f)] private float m_Traction = 0.5f;
+    #endregion
+    
+    #region 私有字段
+    private float m_CurrentSpeed;
+    private Vector3 m_LastPosition;
+    #endregion
+
+    #region 公共属性
+    public float CurrentSpeed => m_CurrentSpeed;
+    public bool IsMoving { get; private set; }
+    #endregion
+
+    #region Unity生命周期
+    private void Awake()
+    {
+        InitializeComponents();
+    }
+
+    private void Start()
+    {
+        // 初始化逻辑
+    }
+
+    private void Update()
+    {
+        UpdateState();
+    }
+
+    private void FixedUpdate()
+    {
+        ApplyPhysics();
+    }
+    #endregion
+
+    #region 公共方法
+    public void ApplyThrottle(float _amount)
+    {
+        // 实现逻辑
+    }
+    #endregion
+
+    #region 私有方法
+    private void InitializeComponents()
+    {
+        // 组件初始化
+    }
+
+    private void UpdateState()
+    {
+        // 状态更新
+    }
+
+    private void ApplyPhysics()
+    {
+        // 物理更新
+    }
+    #endregion
+
+    #if UNITY_EDITOR
+    #region 编辑器方法
+    [ContextMenu("Reset Values")]
+    private void ResetValues()
+    {
+        // 编辑器功能
+    }
+    #endregion
+    #endif
+}
+```
+
+## Unity最佳实践
+
+### 组件引用
+
+- 在Awake中获取组件引用
+- 优先使用[SerializeField]而非public字段
+- 使用TryGetComponent而非GetComponent减少异常风险
+
+```csharp
+[SerializeField] private Rigidbody m_Rigidbody;
+
+private void Awake()
+{
+    if (m_Rigidbody == null)
+    {
+        TryGetComponent(out m_Rigidbody);
+    }
+}
+```
+
+### 性能优化
+
+- 避免在Update中进行昂贵计算
+- 缓存频繁访问的组件和值
+- 使用对象池代替频繁的Instantiate/Destroy
+- 使用协程处理分散在多帧的操作
+
+```csharp
+// 使用对象池
+private Queue<GameObject> m_EffectPool = new Queue<GameObject>();
+
+public GameObject GetEffect()
+{
+    if (m_EffectPool.Count > 0)
+    {
+        GameObject effect = m_EffectPool.Dequeue();
+        effect.SetActive(true);
+        return effect;
+    }
+    
+    return Instantiate(m_EffectPrefab);
+}
+
+public void ReturnEffect(GameObject _effect)
+{
+    _effect.SetActive(false);
+    m_EffectPool.Enqueue(_effect);
+}
+```
+
+### 输入处理
+
+- 使用Input System而非传统Input类
+- 将输入逻辑与游戏逻辑分离
+- 支持多平台输入和重映射
+
+### 物理计算
+
+- 在FixedUpdate中处理物理相关逻辑
+- 使用LayerMask优化碰撞检测
+- 合理设置碰撞器和刚体属性
+
+### 事件驱动编程
+
+- 使用Unity事件系统解耦组件
+- 使用接口实现组件间通信
+- 考虑使用ScriptableObject事件系统实现全局事件
+
+```csharp
+// 定义事件
+public delegate void RaceStartHandler(int _countdownTime);
+public static event RaceStartHandler OnRaceStart;
+
+// 触发事件
+OnRaceStart?.Invoke(3);
+
+// 订阅事件
+private void OnEnable()
+{
+    RaceManager.OnRaceStart += HandleRaceStart;
+}
+
+private void OnDisable()
+{
+    RaceManager.OnRaceStart -= HandleRaceStart;
+}
+
+private void HandleRaceStart(int _countdownTime)
+{
+    // 处理比赛开始事件
+}
+```
+
+## 错误处理和调试
+
+### 日志记录
+
+- 使用不同级别的日志（Log, LogWarning, LogError）
+- 在发布版本中禁用不必要的日志
+- 使用自定义日志系统添加上下文信息
+
+```csharp
+public static class Logger
+{
+    public static bool EnableDebugLogs = true;
+    
+    public static void Log(string _message, GameObject _context = null)
+    {
+        if (EnableDebugLogs)
+        {
+            Debug.Log($"[{Time.time}] {_message}", _context);
+        }
+    }
+}
+```
+
+### 异常处理
+
+- 使用try-catch处理可恢复的错误
+- 在关键操作中添加参数验证
+- 实现故障安全机制避免游戏崩溃
+
+```csharp
+public void LoadVehicleData(string _vehicleId)
+{
+    if (string.IsNullOrEmpty(_vehicleId))
+    {
+        Debug.LogError("Vehicle ID cannot be null or empty");
+        return;
+    }
+    
+    try
+    {
+        // 加载车辆数据
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"Failed to load vehicle data: {e.Message}");
+        // 使用默认数据
+    }
+}
+```
+
+## 代码维护和版本控制
+
+- 为复杂功能添加注释
+- 使用TODO和FIXME标记待处理项
+- 定期重构和优化代码
+- 遵循Git提交规范和分支策略
+

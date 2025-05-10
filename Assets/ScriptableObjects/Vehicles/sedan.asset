@@ -1,0 +1,172 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
+  m_Name: sedan
+  m_EditorClassIdentifier: 
+  m_VehicleName: "\u65B0\u8F66\u8F86"
+  m_VehiclePrefab: {fileID: 8158219980397383101, guid: c569917419252d041928cf785dd8c99e,
+    type: 3}
+  m_VehicleIcon: {fileID: 0}
+  m_VehicleDescription: "\u5916\u56FD\u4EBA\u7BA1\u8FD9\u53EB\u5927\u811A\u8F66\uFF1F\u8FD8\u633A\u5F62\u8C61\u7684\u54C8...."
+  m_BaseMass: 1400
+  m_BaseDrag: 0.2
+  m_BaseAngularDrag: 0.2
+  m_CenterOfMassOffset: {x: 0, y: -0.5, z: 0}
+  m_BaseMaxSteeringAngle: 28
+  m_SteeringSensitivityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 30
+      value: 0.5
+      inSlope: -0.008882965
+      outSlope: -0.008882965
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.1539937
+    - serializedVersion: 3
+      time: 70
+      value: 0.35
+      inSlope: -0.00956623
+      outSlope: -0.00956623
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.16729966
+      outWeight: 0.26996422
+    - serializedVersion: 3
+      time: 90
+      value: 0.15
+      inSlope: -0.00061438914
+      outSlope: -0.00061438914
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.11024338
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_BaseMaxMotorTorque: 5000
+  m_BaseEnginePowerFalloffStartFactor: 0.95
+  m_BaseEnginePowerAtAbsoluteMaxFactor: 0.15
+  m_MaxSpeedForPitchCalc: 80
+  m_EngineMinPitch: 0.4
+  m_EngineMaxPitch: 1.8
+  m_EngineInputPitchFactor: 0.25
+  m_DefaultEngineSound: {fileID: 8300000, guid: 9de22d0557e5f6b4aaa705ad04097f0f,
+    type: 3}
+  m_DefaultDriftSound: {fileID: 8300000, guid: 6c63b22ac7a9a164e945635d7db0212b, type: 3}
+  m_DefaultEngineTorqueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 1
+      inSlope: -0.7220874
+      outSlope: -0.7220874
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.24942683
+    - serializedVersion: 3
+      time: 0.7
+      value: 0.8
+      inSlope: -1.1857039
+      outSlope: -1.1857039
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.197468
+    - serializedVersion: 3
+      time: 1
+      value: 0.6
+      inSlope: -0.19999999
+      outSlope: -0.19999999
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_BaseBrakeTorque: 4000
+  m_DriftActivationBrakeFactor: 0.6
+  m_DriftMinSpeedToPlaySound: 8
+  m_MinSidewaysSlipForDriftSound: 0.4
+  m_TargetEngineSpeedKPH: 90
+  m_AbsoluteMaxSpeedKPH: 130
+  m_EnableNitroSystemBaseline: 0
+  m_BaseMaxNitroCapacity: 150
+  m_BaseNitroConsumptionRate: 20
+  m_BaseNitroForceMagnitude: 10000
+  m_BaseNitroRegenerationRate: 25
+  m_BaseNitroRegenerationDelay: 1
+  m_FL_ForwardFrictionPreset:
+    extremumSlip: 0.6
+    extremumValue: 1.2
+    asymptoteSlip: 1
+    asymptoteValue: 0.8
+    stiffness: 1.5
+  m_RL_ForwardFrictionPreset:
+    extremumSlip: 0.6
+    extremumValue: 1.2
+    asymptoteSlip: 1
+    asymptoteValue: 0.8
+    stiffness: 1.5
+  m_FL_SidewaysFrictionNormalPreset:
+    extremumSlip: 0.3
+    extremumValue: 1.1
+    asymptoteSlip: 0.7
+    asymptoteValue: 0.8
+    stiffness: 1.2
+  m_RL_SidewaysFrictionNormalPreset:
+    extremumSlip: 0.3
+    extremumValue: 1.1
+    asymptoteSlip: 0.7
+    asymptoteValue: 0.8
+    stiffness: 1.2
+  m_FL_SidewaysFrictionDriftingPreset:
+    extremumSlip: 0.4
+    extremumValue: 0.8
+    asymptoteSlip: 0.8
+    asymptoteValue: 0.6
+    stiffness: 0.8
+  m_RL_SidewaysFrictionDriftingPreset:
+    extremumSlip: 0.4
+    extremumValue: 0.8
+    asymptoteSlip: 0.8
+    asymptoteValue: 0.6
+    stiffness: 0.8
+  m_RR_SidewaysFrictionDriftingPreset:
+    extremumSlip: 0.4
+    extremumValue: 0.8
+    asymptoteSlip: 0.8
+    asymptoteValue: 0.6
+    stiffness: 0.8
