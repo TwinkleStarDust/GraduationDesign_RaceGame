@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
   m_Name: Ambulance
   m_EditorClassIdentifier: 
-  m_VehicleName: "\u65B0\u8F66\u8F86"
+  m_VehicleName: "\u201C\u4FFA\u4E0D\u80FD\u6B7B\u201D"
   m_VehiclePrefab: {fileID: 8332813450853561858, guid: 05da80fe3a8b2c14c93d468f33e0d038,
     type: 3}
   m_VehicleIcon: {fileID: 0}
-  m_VehicleDescription: "\u8F66\u8F86\u63CF\u8FF0..."
+  m_VehicleDescription: "\u5F53\u4F60\u4E0D\u4F1A\u8BFB\u6551\u62A4\u8F66\u7684\u82F1\u8BED\u65F6\uFF0C\u60F3\u60F3\u8FD9\u8F86\u8F66\u7684\u540D\u5B57..."
   m_BaseMass: 1500
   m_BaseDrag: 0.08
   m_BaseAngularDrag: 0.2
@@ -46,7 +46,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_BaseMaxMotorTorque: 1500
+  m_BaseMaxMotorTorque: 3000
   m_BaseEnginePowerFalloffStartFactor: 0.9
   m_BaseEnginePowerAtAbsoluteMaxFactor: 0.1
   m_MaxSpeedForPitchCalc: 60

@@ -11,6 +11,9 @@ public class Checkpoint : MonoBehaviour
 
     [Tooltip("标记此检查点是否为起点/终点线。")]
     public bool m_IsFinishLine = false;
+
+    [Tooltip("车辆实际重生时使用的精确变换点。如果未设置，将使用检查点自身的位置。")]
+    public Transform m_RespawnTransformOverride;
     #endregion
 
     #region Unity生命周期

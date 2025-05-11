@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
   m_Name: Taxi
   m_EditorClassIdentifier: 
-  m_VehicleName: Taxi
+  m_VehicleName: "\u91CD\u5E86\u51FA\u79DF\u8F66"
   m_VehiclePrefab: {fileID: 3704460869221414508, guid: dc3a23ff869832d448275f9f5acf6ada,
     type: 3}
   m_VehicleIcon: {fileID: 0}
@@ -55,7 +55,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_BaseMaxMotorTorque: 1500
+  m_BaseMaxMotorTorque: 4500
   m_BaseEnginePowerFalloffStartFactor: 0.9
   m_BaseEnginePowerAtAbsoluteMaxFactor: 0.1
   m_MaxSpeedForPitchCalc: 100

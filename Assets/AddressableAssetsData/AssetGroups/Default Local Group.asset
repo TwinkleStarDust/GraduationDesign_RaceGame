@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_GUID: 2e29c58aaa7b75747be943236b774451
+  m_SerializeEntries:
+  - m_GUID: 00bf05f238d5a464db260a631a3a4c7d
+    m_Address: Parts/NOS03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 207d6527de5bf834eb8c5f2870faee85
+    m_Address: Parts/Tires02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54aa6af7d6ceba54fafabca53a905dfb
+    m_Address: Parts/V6
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e3adda79e405dc4d9b770d6691e9951
+    m_Address: Parts/V8
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8aa5f81c192ffb141bbc1548888235f8
+    m_Address: Parts/V4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a880d018773356a47a3f96251bd2c243
+    m_Address: Parts/Tires01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2c5f95fb101b0342898a59672288760
+    m_Address: Parts/NOS04
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf852c1f27d48fe40a9689169416e444
+    m_Address: Parts/Tires03
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f3167c3c6f4239647b679605a9a6370b
+    m_Address: Parts/NOS01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd4d5ebe5a0a25149a9ea3dcf475bcf1
+    m_Address: Parts/NOS02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c114f1de2173ddd4297a6a0e43ea9fc9, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e2a42bcca7b672f42a5f47fad46a9791, type: 2}
+    - {fileID: 11400000, guid: 047d10073bacd7f46a93bc1898fa9b36, type: 2}

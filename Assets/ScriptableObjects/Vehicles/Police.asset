@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
   m_Name: Police
   m_EditorClassIdentifier: 
-  m_VehicleName: Police
+  m_VehicleName: "\u8B66\u5C40\u7279\u4F9B\u8D5B\u8F66"
   m_VehiclePrefab: {fileID: 3706488107789554949, guid: dc7c2db2b3e06d940b952881473d7952,
     type: 3}
   m_VehicleIcon: {fileID: 0}
@@ -64,7 +64,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_BaseMaxMotorTorque: 2200
+  m_BaseMaxMotorTorque: 4000
   m_BaseEnginePowerFalloffStartFactor: 0.85
   m_BaseEnginePowerAtAbsoluteMaxFactor: 0.2
   m_MaxSpeedForPitchCalc: 80

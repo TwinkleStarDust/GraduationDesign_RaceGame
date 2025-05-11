@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
   m_Name: sedan
   m_EditorClassIdentifier: 
-  m_VehicleName: "\u65B0\u8F66\u8F86"
+  m_VehicleName: "\u5927\u811A\u8F66"
   m_VehiclePrefab: {fileID: 8158219980397383101, guid: c569917419252d041928cf785dd8c99e,
     type: 3}
   m_VehicleIcon: {fileID: 0}

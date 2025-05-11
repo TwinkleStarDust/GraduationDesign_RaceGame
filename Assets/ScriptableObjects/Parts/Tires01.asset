@@ -12,7 +12,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67b00798c46ab5c4e97239625fca6ea1, type: 3}
   m_Name: Tires01
   m_EditorClassIdentifier: 
-  m_PartName: Tires01
-  m_PartType: 1
-  m_PartIcon: {fileID: 0}
-  m_PartDescription: Tires01222
+  m_PartName: "\u5495\u565C\u5495\u565C\u80CE"
+  m_PartCategory: 2
+  m_Icon: {fileID: 21300000, guid: 21bd590734462334fb14a026bc0d4568, type: 3}
+  m_Description: "\u52A0\u6210\u5F97\u4E0D\u591A\uFF0C\u4F46\u5F88\u7A33\u3002"
+  m_Rarity: 2
+  m_UnlockPrice: 750
+  m_IsDefaultUnlocked: 0
+  m_MaxMotorTorqueBonus: 0
+  m_MaxSteeringAngleBonus: 0
+  m_BrakeTorqueBonus: 0
+  m_EnginePowerFalloffStartFactorBonus: 0
+  m_EnginePowerAtAbsoluteMaxFactorBonus: 0
+  m_MassModifier: 0
+  m_DragModifier: 0
+  m_AngularDragModifier: 0
+  m_EngineSound: {fileID: 0}
+  m_EngineTorqueCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_DriftSound: {fileID: 0}
+  m_FL_Fwd_ExtremumSlipModifier: 0
+  m_FL_Fwd_ExtremumValueModifier: 0
+  m_FL_Fwd_AsymptoteSlipModifier: 0
+  m_FL_Fwd_AsymptoteValueModifier: 0
+  m_FL_Fwd_StiffnessModifier: 0
+  m_RL_Fwd_ExtremumSlipModifier: 0
+  m_RL_Fwd_ExtremumValueModifier: 0
+  m_RL_Fwd_AsymptoteSlipModifier: 0
+  m_RL_Fwd_AsymptoteValueModifier: 0
+  m_RL_Fwd_StiffnessModifier: 0
+  m_FL_Side_Normal_ExtremumSlipModifier: 0
+  m_FL_Side_Normal_ExtremumValueModifier: 0
+  m_FL_Side_Normal_AsymptoteSlipModifier: 0
+  m_FL_Side_Normal_AsymptoteValueModifier: 0
+  m_FL_Side_Normal_StiffnessModifier: 0
+  m_RL_Side_Normal_ExtremumSlipModifier: 0
+  m_RL_Side_Normal_ExtremumValueModifier: 0
+  m_RL_Side_Normal_AsymptoteSlipModifier: 0
+  m_RL_Side_Normal_AsymptoteValueModifier: 0
+  m_RL_Side_Normal_StiffnessModifier: 0
+  m_FL_Side_Drift_ExtremumSlipModifier: 0
+  m_FL_Side_Drift_ExtremumValueModifier: 0
+  m_FL_Side_Drift_AsymptoteSlipModifier: 0
+  m_FL_Side_Drift_AsymptoteValueModifier: 0
+  m_FL_Side_Drift_StiffnessModifier: 0
+  m_RL_Side_Drift_ExtremumSlipModifier: 0
+  m_RL_Side_Drift_ExtremumValueModifier: 0
+  m_RL_Side_Drift_AsymptoteSlipModifier: 0
+  m_RL_Side_Drift_AsymptoteValueModifier: 0
+  m_RL_Side_Drift_StiffnessModifier: 0
+  m_MaxNitroCapacityBonus: 0
+  m_NitroConsumptionRateReductionBonus: 0
+  m_NitroForceMagnitudeBonus: 0
+  m_NitroRegenerationRateBonus: 0
+  m_NitroRegenerationDelayReductionBonus: 0

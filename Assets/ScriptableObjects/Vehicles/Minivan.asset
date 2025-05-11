@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16146b0188ea7b74e9c632394818b56a, type: 3}
   m_Name: Minivan
   m_EditorClassIdentifier: 
-  m_VehicleName: Minivan
+  m_VehicleName: "\u4E00\u9762\u5305\u8F66\u4EBA"
   m_VehiclePrefab: {fileID: 1155489915985389494, guid: 698a40df6e3a4cd42b4a26aae356809c,
     type: 3}
   m_VehicleIcon: {fileID: 0}
@@ -73,9 +73,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_BaseMaxMotorTorque: 2100
-  m_BaseEnginePowerFalloffStartFactor: 0.75
-  m_BaseEnginePowerAtAbsoluteMaxFactor: 0.15
+  m_BaseMaxMotorTorque: 4500
+  m_BaseEnginePowerFalloffStartFactor: 0.9
+  m_BaseEnginePowerAtAbsoluteMaxFactor: 0.1
   m_MaxSpeedForPitchCalc: 90
   m_EngineMinPitch: 0.35
   m_EngineMaxPitch: 1.8

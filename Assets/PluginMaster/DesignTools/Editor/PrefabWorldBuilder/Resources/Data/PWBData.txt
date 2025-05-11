@@ -1090,7 +1090,8 @@
                     "AI",
                     "ignoreSensor",
                     "Ground",
-                    "carBody"
+                    "carBody",
+                    "CheckPoint"
                 ],
                 "_slopeFilter": {
                     "_v1": 0.0,
@@ -2800,7 +2801,8 @@
                     "AI",
                     "ignoreSensor",
                     "Ground",
-                    "carBody"
+                    "carBody",
+                    "CheckPoint"
                 ]
             }
         ],
@@ -3500,14 +3502,14 @@
             "_snappingEnabled": false,
             "_snappingOn": {
                 "x": true,
-                "y": false,
-                "z": true
+                "y": true,
+                "z": false
             },
             "_visibleGrid": false,
             "_gridOn": {
                 "x": false,
-                "y": true,
-                "z": false
+                "y": false,
+                "z": true
             },
             "_lockedGrid": false,
             "_step": {

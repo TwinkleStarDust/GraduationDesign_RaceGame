@@ -8,13 +8,13 @@ public class MainMenuUI : MonoBehaviour
     {
         Debug.Log("开始游戏按钮被按下");
         // 调用UIManager显示地图选择面板
-        if (UIManager.Instance != null)
+        if (MainMenuUIManager.Instance != null)
         {
-            UIManager.Instance.ShowMapSelectionPanel();
+            MainMenuUIManager.Instance.ShowMapSelectionPanel();
         }
         else
         {
-            Debug.LogError("UIManager 实例未找到！");
+            Debug.LogError("MainMenuUIManager 实例未找到！");
         }
     }
 
@@ -22,13 +22,13 @@ public class MainMenuUI : MonoBehaviour
     {
         Debug.Log("车库按钮被按下");
         // 调用UIManager显示车库面板
-        if (UIManager.Instance != null)
+        if (MainMenuUIManager.Instance != null)
         {
-            UIManager.Instance.ShowGaragePanel();
+            MainMenuUIManager.Instance.ShowGaragePanel();
         }
         else
         {
-            Debug.LogError("UIManager 实例未找到！");
+            Debug.LogError("MainMenuUIManager 实例未找到！");
         }
     }
 
@@ -36,13 +36,13 @@ public class MainMenuUI : MonoBehaviour
     {
         Debug.Log("设置按钮被按下");
         // 调用UIManager显示设置面板
-        if (UIManager.Instance != null)
+        if (MainMenuUIManager.Instance != null)
         {
-            UIManager.Instance.ShowSettingsPanel();
+            MainMenuUIManager.Instance.ShowSettingsPanel();
         }
         else
         {
-            Debug.LogError("UIManager 实例未找到！");
+            Debug.LogError("MainMenuUIManager 实例未找到！");
         }
     }
 

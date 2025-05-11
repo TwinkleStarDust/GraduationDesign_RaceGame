@@ -109,7 +109,7 @@ public class PlayerRaceState : MonoBehaviour
             
             // 更新上一个正确通过的检查点ID
             m_LastCorrectlyPassedCheckpointID = _checkpoint.m_CheckpointID;
-            m_LastCheckpointRespawnTransform = _checkpoint.transform; 
+            m_LastCheckpointRespawnTransform = _checkpoint.m_RespawnTransformOverride != null ? _checkpoint.m_RespawnTransformOverride : _checkpoint.transform; 
 
             float currentTime = Time.time;
             
@@ -214,7 +214,17 @@ public class PlayerRaceState : MonoBehaviour
         
         if (m_RaceManager != null && m_RaceManager.GetStartingLineTransform() != null)
         {
-            m_LastCheckpointRespawnTransform = m_RaceManager.GetStartingLineTransform();
+            Transform initialCheckpointObjectTransform = m_RaceManager.GetStartingLineTransform();
+            Checkpoint startingLineCheckpoint = initialCheckpointObjectTransform.GetComponent<Checkpoint>();
+
+            if (startingLineCheckpoint != null && startingLineCheckpoint.m_RespawnTransformOverride != null)
+            {
+                m_LastCheckpointRespawnTransform = startingLineCheckpoint.m_RespawnTransformOverride;
+            }
+            else
+            {
+                m_LastCheckpointRespawnTransform = initialCheckpointObjectTransform; // 备选方案，使用检查点对象自身的Transform
+            }
         } else {
              Debug.LogWarning("[PlayerRaceState] RaceManager 未设置或无法获取初始重生点。", this);
         }

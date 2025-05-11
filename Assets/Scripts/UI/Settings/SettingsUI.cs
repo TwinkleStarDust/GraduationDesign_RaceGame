@@ -87,14 +87,21 @@ public class SettingsUI : MonoBehaviour
     private void OnBackButtonPressed()
     {
         PlayerPrefs.Save(); // 确保设置被保存
-        Debug.Log("从设置返回主菜单");
-        if (UIManager.Instance != null)
+        Debug.Log("设置界面的返回按钮被按下");
+
+        if (InGameUIManager.Instance != null && InGameUIManager.Instance.IsPauseMenuActive()) 
         {
-            UIManager.Instance.ShowMainMenuPanel();
+            Debug.Log("从设置返回到游戏内暂停菜单");
+            InGameUIManager.Instance.CloseSettingsAndReturnToPauseMenu();
+        }
+        else if (MainMenuUIManager.Instance != null)
+        {
+            Debug.Log("从设置返回到主菜单");
+            MainMenuUIManager.Instance.ShowMainMenuPanel(); 
         }
         else
         {
-            Debug.LogError("UIManager 实例未找到！");
+            Debug.LogError("无法确定从设置界面返回到哪个UI管理器！MainMenuUIManager 和 InGameUIManager 实例都未找到或不适用。");
         }
     }
     #endregion

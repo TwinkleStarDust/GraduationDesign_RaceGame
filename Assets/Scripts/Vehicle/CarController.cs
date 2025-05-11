@@ -97,6 +97,13 @@ public class CarController : MonoBehaviour
     private float m_FinalDriftMinSpeedToPlaySound;
     private float m_FinalMinSidewaysSlipForDriftSound;
     private float m_FinalMinSlipMagnitudeForTireMarks;
+
+    // 新增：用于触摸输入的状态
+    private bool m_TouchThrottleActive = false;
+    private bool m_TouchBrakeActive = false;
+    private bool m_TouchSteerLeftActive = false;
+    private bool m_TouchSteerRightActive = false;
+    private bool m_TouchNitroActive = false;
     #endregion
 
     [Header("控制参数")]
@@ -116,6 +123,7 @@ public class CarController : MonoBehaviour
     private bool m_IsNitroActive = false;
     private float m_TimeSinceNitroLastUsed = 0f;
     private float currentNitroAmount;
+    private bool m_IsInputDisabled = false; // 新增：用于禁用输入
 
     #region 公共属性 - 用于外部访问车辆状态
     public bool IsNitroSystemEnabled => m_FinalEnableNitroSystem;
@@ -265,7 +273,7 @@ public class CarController : MonoBehaviour
         m_FinalEnginePowerFalloffStartFactor = Mathf.Clamp(m_FinalEnginePowerFalloffStartFactor, 0.1f, 1f);
         m_FinalEnginePowerAtAbsoluteMaxFactor = Mathf.Clamp(m_FinalEnginePowerAtAbsoluteMaxFactor, 0f, 0.5f);
 
-        switch (part.PartCategory)
+        switch (part.PartCategoryProperty)
         {
             case PartCategory.Engine:
                 if (part.EngineSound != null) m_FinalEngineSoundClip = part.EngineSound;
@@ -293,15 +301,16 @@ public class CarController : MonoBehaviour
             case PartCategory.Nitro:
                 m_FinalEnableNitroSystem = true; 
                 m_FinalMaxNitroCapacity += part.MaxNitroCapacityBonus;
-                m_FinalNitroConsumptionRate *= part.NitroConsumptionRateMultiplier;
+                m_FinalNitroConsumptionRate -= part.NitroConsumptionRateReductionBonus; 
                 m_FinalNitroForceMagnitude += part.NitroForceMagnitudeBonus;
                 m_FinalNitroRegenerationRate += part.NitroRegenerationRateBonus;
-                m_FinalNitroRegenerationDelay *= part.NitroRegenerationDelayMultiplier;
+                m_FinalNitroRegenerationDelay -= part.NitroRegenerationDelayReductionBonus; 
+                
                 m_FinalMaxNitroCapacity = Mathf.Max(10, m_FinalMaxNitroCapacity);
-                m_FinalNitroConsumptionRate = Mathf.Max(1, m_FinalNitroConsumptionRate);
+                m_FinalNitroConsumptionRate = Mathf.Max(0.1f, m_FinalNitroConsumptionRate);
                 m_FinalNitroForceMagnitude = Mathf.Max(0, m_FinalNitroForceMagnitude);
                 m_FinalNitroRegenerationRate = Mathf.Max(0, m_FinalNitroRegenerationRate);
-                m_FinalNitroRegenerationDelay = Mathf.Max(0.1f, m_FinalNitroRegenerationDelay);
+                m_FinalNitroRegenerationDelay = Mathf.Max(0.05f, m_FinalNitroRegenerationDelay);
                 break;
         }
     }
@@ -442,8 +451,59 @@ public class CarController : MonoBehaviour
     
     private void GetInput()
     {
-        m_MotorInput = Input.GetAxis("Vertical"); 
-        m_TargetSteerInput = Input.GetAxis("Horizontal"); 
+        if (m_IsInputDisabled) // 新增：检查输入是否被禁用
+        {
+            m_MotorInput = 0f;
+            m_TargetSteerInput = 0f;
+            // 如果有触摸状态，也在这里重置它们是个好主意，以防菜单打开时按钮仍然被"按住"
+            m_TouchThrottleActive = false;
+            m_TouchBrakeActive = false;
+            m_TouchSteerLeftActive = false;
+            m_TouchSteerRightActive = false;
+            m_TouchNitroActive = false;
+            return;
+        }
+
+        float keyboardVerticalInput = Input.GetAxis("Vertical");
+        float keyboardHorizontalInput = Input.GetAxis("Horizontal");
+
+        // 优先处理触摸油门/刹车输入
+        if (m_TouchThrottleActive && !m_TouchBrakeActive)
+        {
+            m_MotorInput = 1.0f;
+        }
+        else if (m_TouchBrakeActive && !m_TouchThrottleActive)
+        {
+            m_MotorInput = -1.0f;
+        }
+        else if (m_TouchThrottleActive && m_TouchBrakeActive) // 同时按油门和刹车
+        {
+            m_MotorInput = 0.0f;
+        }
+        else
+        {
+            // 没有活动的触摸油门/刹车输入，使用键盘输入
+            m_MotorInput = keyboardVerticalInput;
+        }
+
+        // 处理触摸转向输入
+        if (m_TouchSteerLeftActive && !m_TouchSteerRightActive)
+        {
+            m_TargetSteerInput = -1.0f;
+        }
+        else if (m_TouchSteerRightActive && !m_TouchSteerLeftActive)
+        {
+            m_TargetSteerInput = 1.0f;
+        }
+        else if (m_TouchSteerLeftActive && m_TouchSteerRightActive) // 同时按左右转向
+        {
+            m_TargetSteerInput = 0.0f;
+        }
+        else
+        {
+            // 没有活动的触摸转向输入，使用键盘输入
+            m_TargetSteerInput = keyboardHorizontalInput;
+        }
     }
 
     private void ApplyMotorAndSteering()
@@ -493,33 +553,54 @@ public class CarController : MonoBehaviour
 
     private void ApplyBrakesAndDrift()
     {
-        bool isDriftingIntent = Input.GetKey(KeyCode.Space); 
+        bool isKeyboardDriftIntent = Input.GetKey(KeyCode.Space);
+        bool isTouchBrakeButtonPressed = m_TouchBrakeActive; // 玩家是否按下了触摸刹车按钮
+
         Vector3 localVelocity = transform.InverseTransformDirection(m_Rigidbody.linearVelocity);
         float forwardSpeed = localVelocity.z;
         bool applyStandardBrakes = false;
 
+        // 标准刹车逻辑：当输入方向与当前速度方向相反时，或者漂移意图激活且有一定速度时
         if (Mathf.Abs(forwardSpeed) > 0.1f && Mathf.Sign(m_MotorInput) == -Mathf.Sign(forwardSpeed))
         {
             applyStandardBrakes = true;
         }
-        
-        float currentBrakeTorqueToApply = applyStandardBrakes ? m_FinalBrakeTorque : 0f;
 
-        if (isDriftingIntent)
+        // 玩家是否明确按下了用于漂移/手刹的按钮 (键盘或触摸)
+        bool playerWantsToDriftOrHardBrake = isKeyboardDriftIntent || isTouchBrakeButtonPressed;
+
+        if (m_MotorInput < -0.01f) // 优先处理明确的倒车马达输入
         {
-            ApplyDriftFrictionSettings(true); 
+            ApplyDriftFrictionSettings(false); // 倒车时使用正常摩擦力
+            // 当m_MotorInput为负时，GetInput已经因为isTouchBrakeButtonPressed=true而设置了它
+            // 此时，马达扭矩已经是负的，负责倒车。
+            // 我们只需要施加正常的刹车（主要是在从前进切换到倒车时，或者倒车时微调）
+            // 如果isTouchBrakeButtonPressed为true，并且m_MotorInput为负，我们不希望后轮有额外的漂移刹车。
+            float brakeValue = applyStandardBrakes ? m_FinalBrakeTorque : 0f;
+            if(wheelFL != null) wheelFL.brakeTorque = brakeValue;
+            if(wheelFR != null) wheelFR.brakeTorque = brakeValue;
+            if(wheelRL != null) wheelRL.brakeTorque = brakeValue; // 后轮也使用标准刹车，而不是漂移刹车
+            if(wheelRR != null) wheelRR.brakeTorque = brakeValue;
+        }
+        else if (playerWantsToDriftOrHardBrake) // 玩家按下了漂移/手刹键，并且没有负的马达输入 (即不是主要想倒车)
+        {
+            ApplyDriftFrictionSettings(true); // 激活漂移摩擦力设置
+            // 后轮施加漂移/手刹制动力
             if(wheelRL != null) wheelRL.brakeTorque = m_FinalBrakeTorque * m_FinalDriftActivationBrakeFactor;
             if(wheelRR != null) wheelRR.brakeTorque = m_FinalBrakeTorque * m_FinalDriftActivationBrakeFactor;
-            if(wheelFL != null) wheelFL.brakeTorque = currentBrakeTorqueToApply * 0.2f; 
-            if(wheelFR != null) wheelFR.brakeTorque = currentBrakeTorqueToApply * 0.2f;
+            // 前轮的刹车可以基于标准刹车逻辑，在漂移时通常较轻或根据需求调整
+            float frontBrakeFactor = (applyStandardBrakes && m_MotorInput >=0) ? 0.2f : 0f; // 如果同时踩油门或空档按刹车，前轮轻刹
+            if(wheelFL != null) wheelFL.brakeTorque = m_FinalBrakeTorque * frontBrakeFactor;
+            if(wheelFR != null) wheelFR.brakeTorque = m_FinalBrakeTorque * frontBrakeFactor;
         }
-        else
+        else // 没有倒车马达输入，也没有按下漂移/手刹键
         {
-            ApplyDriftFrictionSettings(false); 
-            if(wheelFL != null) wheelFL.brakeTorque = currentBrakeTorqueToApply;
-            if(wheelFR != null) wheelFR.brakeTorque = currentBrakeTorqueToApply;
-            if(wheelRL != null) wheelRL.brakeTorque = currentBrakeTorqueToApply;
-            if(wheelRR != null) wheelRR.brakeTorque = currentBrakeTorqueToApply;
+            ApplyDriftFrictionSettings(false);
+            float currentBrake = applyStandardBrakes ? m_FinalBrakeTorque : 0f;
+            if(wheelFL != null) wheelFL.brakeTorque = currentBrake;
+            if(wheelFR != null) wheelFR.brakeTorque = currentBrake;
+            if(wheelRL != null) wheelRL.brakeTorque = currentBrake;
+            if(wheelRR != null) wheelRR.brakeTorque = currentBrake;
         }
     }
 
@@ -625,14 +706,15 @@ public class CarController : MonoBehaviour
             if (vehicleIsMovingFastEnough)
             {
                 float slipThresholdForSound = m_FinalMinSidewaysSlipForDriftSound;
-                if (Input.GetKey(KeyCode.Space)) 
+                bool playerWantsToDrift = Input.GetKey(KeyCode.Space) || m_TouchBrakeActive; // 检查键盘或触摸漂移意图
+                if (playerWantsToDrift)
                 {
-                    slipThresholdForSound *= 0.15f; 
+                    slipThresholdForSound *= 0.15f;
                 }
                 if (averageSidewaysSlip > slipThresholdForSound)
                 {
                     shouldPlayDriftSound = true;
-    }
+                }
             }
 
             if (shouldPlayDriftSound)
@@ -648,7 +730,9 @@ public class CarController : MonoBehaviour
 
     private void UpdateTireMarksSystem()
     {
-        bool isDriftingActiveIntent = Input.GetKey(KeyCode.Space); 
+        bool isDriftingActiveIntentByKeyboard = Input.GetKey(KeyCode.Space);
+        bool isDriftingActiveIntentByTouch = m_TouchBrakeActive; // 假设触摸刹车也触发漂移轮胎痕迹
+        bool isDriftingActiveIntent = isDriftingActiveIntentByKeyboard || isDriftingActiveIntentByTouch;
 
         HandleSingleTireTrail(wheelRL, tireTrailRL, isDriftingActiveIntent);
         HandleSingleTireTrail(wheelRR, tireTrailRR, isDriftingActiveIntent);
@@ -692,7 +776,7 @@ public class CarController : MonoBehaviour
         if (trail != null)
         {
             trail.emitting = isEmitting;
-    }
+        }
     }
 
 #if UNITY_EDITOR
@@ -721,8 +805,8 @@ public class CarController : MonoBehaviour
             {
                 Gizmos.color = previewColor;
                 Gizmos.DrawSphere(transform.TransformPoint(previewLocalCom), 0.1f);
+            }
         }
-    }
     }
 #endif
 
@@ -763,7 +847,10 @@ public class CarController : MonoBehaviour
 
     private void HandleNitroSystem()
     {
-        if (Input.GetKey(nitroKey) && currentNitroAmount > 0)
+        bool keyboardNitroPressed = Input.GetKey(nitroKey);
+        bool touchNitroPressed = m_TouchNitroActive;
+
+        if ((keyboardNitroPressed || touchNitroPressed) && currentNitroAmount > 0)
         {
             m_IsNitroActive = true;
             currentNitroAmount -= m_FinalNitroConsumptionRate * Time.deltaTime;
@@ -794,4 +881,60 @@ public class CarController : MonoBehaviour
             }
         }
     }
+
+    #region 公共方法 - 用于外部控制车辆状态
+    /// <summary>
+    /// 设置触摸油门状态。
+    /// </summary>
+    /// <param name="active">是否激活油门。</param>
+    public void SetTouchThrottle(bool active)
+    {
+        m_TouchThrottleActive = active;
+    }
+
+    /// <summary>
+    /// 设置触摸刹车/倒车状态。
+    /// </summary>
+    /// <param name="active">是否激活刹车/倒车。</param>
+    public void SetTouchBrake(bool active)
+    {
+        m_TouchBrakeActive = active;
+    }
+
+    /// <summary>
+    /// 设置触摸左转状态。
+    /// </summary>
+    /// <param name="active">是否激活左转。</param>
+    public void SetTouchSteerLeft(bool active)
+    {
+        m_TouchSteerLeftActive = active;
+    }
+
+    /// <summary>
+    /// 设置触摸右转状态。
+    /// </summary>
+    /// <param name="active">是否激活右转。</param>
+    public void SetTouchSteerRight(bool active)
+    {
+        m_TouchSteerRightActive = active;
+    }
+
+    /// <summary>
+    /// 设置触摸氮气状态。
+    /// </summary>
+    /// <param name="active">是否激活氮气。</param>
+    public void SetTouchNitro(bool active)
+    {
+        m_TouchNitroActive = active;
+    }
+
+    /// <summary>
+    /// 设置是否禁用玩家控制输入。
+    /// </summary>
+    /// <param name="isDisabled">如果为true，则禁用输入；否则启用。</param>
+    public void SetInputDisabled(bool isDisabled)
+    {
+        m_IsInputDisabled = isDisabled;
+    }
+    #endregion
 }

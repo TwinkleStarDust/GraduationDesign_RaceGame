@@ -1,18 +1,19 @@
 using UnityEngine;
+// using UnityEngine.SceneManagement; // 如果需要场景加载，保留
 
-public class UIManager : MonoBehaviour
+public class MainMenuUIManager : MonoBehaviour // 类名已更改
 {
     #region Singleton
-    public static UIManager Instance { get; private set; }
+    public static MainMenuUIManager Instance { get; private set; }
     #endregion
 
     #region 私有字段
-    [Header("UI 面板")]
+    [Header("主菜单 UI 面板")]
     [SerializeField] private GameObject m_MainMenuPanel;
     [SerializeField] private GameObject m_MapSelectionPanel;
     [SerializeField] private GameObject m_GaragePanel;
-    [SerializeField] private GameObject m_SettingsPanel;
-    // 可以根据需要添加其他面板，例如加载界面、游戏内UI等
+    [SerializeField] private GameObject m_SettingsPanel; // 这是主菜单的设置面板
+    // 可以根据需要添加其他主菜单相关面板
     #endregion
 
     #region Unity生命周期
@@ -21,7 +22,7 @@ public class UIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // 如果需要在场景切换时保留UIManager，取消此行注释
+            // DontDestroyOnLoad(gameObject); // 通常主菜单UI管理器不需要跨场景保留
         }
         else
         {
@@ -39,7 +40,7 @@ public class UIManager : MonoBehaviour
     #region 公共方法
     public void ShowMainMenuPanel()
     {
-        HideAllPanels();
+        HideAllMainMenuPanels();
         if (m_MainMenuPanel != null)
         {
             m_MainMenuPanel.SetActive(true);
@@ -48,7 +49,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowMapSelectionPanel()
     {
-        HideAllPanels();
+        HideAllMainMenuPanels();
         if (m_MapSelectionPanel != null)
         {
             m_MapSelectionPanel.SetActive(true);
@@ -57,23 +58,23 @@ public class UIManager : MonoBehaviour
 
     public void ShowGaragePanel()
     {
-        HideAllPanels();
+        HideAllMainMenuPanels();
         if (m_GaragePanel != null)
         {
             m_GaragePanel.SetActive(true);
         }
     }
 
-    public void ShowSettingsPanel()
+    public void ShowSettingsPanel() // 主菜单的设置面板
     {
-        HideAllPanels();
+        HideAllMainMenuPanels();
         if (m_SettingsPanel != null)
         {
             m_SettingsPanel.SetActive(true);
         }
     }
 
-    public void HideAllPanels()
+    public void HideAllMainMenuPanels() // 只隐藏主菜单相关面板
     {
         if (m_MainMenuPanel != null) m_MainMenuPanel.SetActive(false);
         if (m_MapSelectionPanel != null) m_MapSelectionPanel.SetActive(false);

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/UI/MainMenu.unity
+    guid: c51ac77ead54525448e3ee7bb082ba41
+  - enabled: 1
     path: Assets/Scenes/Stage1.unity
     guid: 76552a877022f324998e0349a43553f3
   - enabled: 1
@@ -13,15 +16,14 @@ EditorBuildSettings:
     guid: 624637455d08ab8479a436ea4d84e14b
   - enabled: 1
     path: Assets/Scenes/Stage3.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    guid: 2bad47a0eac0b1e40a9b038eda70bde3
   - enabled: 1
     path: Assets/Scenes/Stage4.unity
-    guid: 66afc21e9ac506e4f954cf49dff45e83
+    guid: 1c4d1c2ef76030447ba8cbac6191e480
   - enabled: 1
-    path: Assets/LMHPOLY/Low Poly Nature Bundle/_Demo Scenes/Demo_02.unity
-    guid: d2a1cc6ff1ef55f4fa19aa89124b5563
-  - enabled: 1
-    path: Assets/LMHPOLY/Low Poly Nature Bundle/_Demo Scenes/Demo_03.unity
-    guid: 2bad47a0eac0b1e40a9b038eda70bde3
-  m_configObjects: {}
+    path: Assets/Scenes/Stage5.unity
+    guid: 5b18242072fdc6a48a477956087926c7
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 2fded5a5cd049f0428a912679d1acffd,
+      type: 2}
   m_UseUCBPForAssetBundles: 0

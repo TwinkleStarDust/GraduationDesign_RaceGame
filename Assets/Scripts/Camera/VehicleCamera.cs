@@ -137,26 +137,16 @@ namespace Vehicle
         {
             if (m_TargetTransform == null) return; // 使用 m_TargetTransform 进行检查
 
-            // 检查视角切换
+            // 检查键盘视角切换 (保留PC测试用)
             if (enableViewSwitch && Input.GetKeyDown(switchViewKey))
             {
-                // 循环切换三种视角模式
-                switch (currentViewMode)
-                {
-                    case CameraViewMode.ThirdPerson:
-                        SetViewMode(CameraViewMode.FirstPerson);
-                        break;
-                    case CameraViewMode.FirstPerson:
-                        SetViewMode(CameraViewMode.OrbitControl);
-                        break;
-                    case CameraViewMode.OrbitControl:
-                        SetViewMode(CameraViewMode.ThirdPerson);
-                        break;
-                }
+                CycleNextViewModeInternal();
             }
 
             // 更新相机位置
             UpdateCameraPosition(false);
+
+            RestoreCursorState();
         }
 
 
@@ -358,6 +348,36 @@ namespace Vehicle
         {
             // 确保恢复鼠标状态
             RestoreCursorState();
+        }
+
+        /// <summary>
+        /// 公共方法：循环切换到下一个相机视角模式。
+        /// 可以由UI按钮调用。
+        /// </summary>
+        public void CycleNextViewMode()
+        {
+            if (!enableViewSwitch) return;
+            CycleNextViewModeInternal();
+        }
+
+        private void CycleNextViewModeInternal()
+        {
+            switch (currentViewMode)
+            {
+                case CameraViewMode.ThirdPerson:
+                    SetViewMode(CameraViewMode.FirstPerson);
+                    break;
+                case CameraViewMode.FirstPerson:
+                    SetViewMode(CameraViewMode.OrbitControl);
+                    break;
+                case CameraViewMode.OrbitControl:
+                    SetViewMode(CameraViewMode.ThirdPerson);
+                    break;
+                default:
+                    SetViewMode(CameraViewMode.ThirdPerson); // 默认为第三人称
+                    break;
+            }
+            Debug.Log("切换相机视角到: " + currentViewMode);
         }
     }
 }

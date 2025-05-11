@@ -126,13 +126,13 @@ public class MapSelectionUI : MonoBehaviour
     private void OnBackButtonPressed()
     {
         Debug.Log("返回主菜单");
-        if (UIManager.Instance != null)
+        if (MainMenuUIManager.Instance != null)
         {
-            UIManager.Instance.ShowMainMenuPanel();
+            MainMenuUIManager.Instance.ShowMainMenuPanel();
         }
         else
         {
-            Debug.LogError("UIManager 实例未找到！");
+            Debug.LogError("MainMenuUIManager 实例未找到！");
         }
     }
     #endregion

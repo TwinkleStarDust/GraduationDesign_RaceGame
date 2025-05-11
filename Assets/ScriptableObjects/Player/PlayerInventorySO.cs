@@ -42,7 +42,7 @@ public class PlayerInventorySO : ScriptableObject
             return;
         }
 
-        switch (_partToEquip.PartCategory)
+        switch (_partToEquip.PartCategoryProperty)
         {
             case PartCategory.Engine:
                 m_EquippedEngine = _partToEquip;
@@ -57,7 +57,29 @@ public class PlayerInventorySO : ScriptableObject
                 Debug.Log($"已装备氮气: {_partToEquip.PartName}");
                 break;
             default:
-                Debug.LogWarning($"尝试装备一个未知类型的零件: {_partToEquip.PartName}, 类型: {_partToEquip.PartCategory}");
+                Debug.LogWarning($"尝试装备一个未知类型的零件: {_partToEquip.PartName}, 类型: {_partToEquip.PartCategoryProperty}");
+                break;
+        }
+    }
+
+    public void UnequipPart(PartCategory _categoryToUnequip)
+    {
+        switch (_categoryToUnequip)
+        {
+            case PartCategory.Engine:
+                if (m_EquippedEngine != null) Debug.Log($"已卸载引擎: {m_EquippedEngine.PartName}");
+                m_EquippedEngine = null;
+                break;
+            case PartCategory.Tire:
+                if (m_EquippedTires != null) Debug.Log($"已卸载轮胎: {m_EquippedTires.PartName}");
+                m_EquippedTires = null;
+                break;
+            case PartCategory.Nitro:
+                if (m_EquippedNOS != null) Debug.Log($"已卸载氮气: {m_EquippedNOS.PartName}");
+                m_EquippedNOS = null;
+                break;
+            default:
+                Debug.LogWarning($"尝试卸载一个未知类型的零件: {_categoryToUnequip}");
                 break;
         }
     }
