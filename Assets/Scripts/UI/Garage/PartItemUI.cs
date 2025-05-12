@@ -3,13 +3,10 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("UI元素引用")]
     [SerializeField] private Image m_PartIconImage;
-    [SerializeField] private TextMeshProUGUI m_PartNameText;
-    [SerializeField] private TextMeshProUGUI m_PartDescriptionText; // 可选，显示零件描述
-    [SerializeField] private Button m_SelectButton;
 
     private PartDataSO m_PartData;
     private GarageUI m_GarageUIInstance;
@@ -35,6 +32,33 @@ public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     /// <param name="_garageUI">GarageUI的实例，用于回调。</param>
     public void Setup(PartDataSO _data, GarageUI _garageUI)
     {
+        if (m_RectTransform == null)
+        {
+            m_RectTransform = GetComponent<RectTransform>();
+        }
+        if (m_CanvasGroup == null)
+        {
+            m_CanvasGroup = GetComponent<CanvasGroup>();
+            if (m_CanvasGroup == null)
+            {
+                m_CanvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        if (m_RectTransform == null)
+        {
+            Debug.LogError("PartItemUI.Setup: Failed to get RectTransform component! Cannot proceed.", this.gameObject);
+            if(m_CanvasGroup != null) m_CanvasGroup.alpha = 0;
+            enabled = false;
+            return;
+        }
+        if (m_CanvasGroup == null)
+        {
+             Debug.LogError("PartItemUI.Setup: Failed to get or add CanvasGroup component! Dragging might fail.", this.gameObject);
+        }
+
+        Debug.Log($"PartItemUI Setup called. RectTransform acquired. Data: {(_data != null ? _data.name : "NULL DATA")}", this.gameObject);
+
         m_PartData = _data;
         m_GarageUIInstance = _garageUI;
         m_OriginalParent = transform.parent;
@@ -42,11 +66,8 @@ public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
 
         if (m_PartData == null)
         {
-            Debug.LogError("传递给PartItemUI的PartDataSO为空!");
-            if (m_PartNameText != null) m_PartNameText.text = "错误";
+            Debug.LogError("传递给PartItemUI的PartDataSO为空!", this.gameObject);
             if (m_PartIconImage != null) m_PartIconImage.gameObject.SetActive(false);
-            if (m_PartDescriptionText != null) m_PartDescriptionText.text = "";
-            if (m_SelectButton != null) m_SelectButton.interactable = false;
             gameObject.SetActive(false);
             return;
         }
@@ -66,22 +87,6 @@ public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             {
                 m_PartIconImage.gameObject.SetActive(false);
             }
-        }
-
-        if (m_PartNameText != null)
-        {
-            m_PartNameText.text = m_PartData.PartName;
-        }
-
-        if (m_PartDescriptionText != null)
-        {
-            m_PartDescriptionText.text = m_PartData.Description;
-        }
-
-        if (m_SelectButton != null)
-        {
-            m_SelectButton.onClick.RemoveAllListeners();
-            m_SelectButton.gameObject.SetActive(false);
         }
     }
 
@@ -205,6 +210,11 @@ public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
             {
                 Debug.Log($"PartItemUI ({m_PartData.PartName}): Not auto-equipped, returning to original parent.");
                 ReturnToOriginalParent();
+                // 可选：如果返回原位且当前详情是此物品，可以保持显示或清除
+                // if (m_GarageUIInstance != null && m_GarageUIInstance.m_CurrentlySelectedPartForDetail == m_PartData) 
+                // { 
+                //     m_GarageUIInstance.ClearPartDetails(); 
+                // }
             }
         }
         
@@ -214,8 +224,39 @@ public class PartItemUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     public void ReturnToOriginalParent()
     {
         transform.SetParent(m_OriginalParent);
-        m_RectTransform.localPosition = m_OriginalPosition;
-        m_RectTransform.SetSiblingIndex(0);
+        // 使用localPosition确保其在父级内的相对位置正确
+        if (m_RectTransform != null) m_RectTransform.localPosition = m_OriginalPosition;
+        // 如果有缩放或旋转变化，也需要在这里重置，例如：
+        // if (m_RectTransform != null) m_RectTransform.localScale = Vector3.one;
+        // if (m_RectTransform != null) m_RectTransform.localRotation = Quaternion.identity;
+
+        // 确保CanvasGroup状态恢复
+        if (m_CanvasGroup != null) 
+        {
+            m_CanvasGroup.alpha = 1f;
+            m_CanvasGroup.blocksRaycasts = true;
+        }
+
+        // 如果m_OriginalParent是布局组，它会自动处理顺序。
+        // 如果需要精确恢复原始siblingIndex，需要额外记录和设置。
+        // transform.SetSiblingIndex(m_OriginalSiblingIndex); 
+        gameObject.SetActive(true); // 确保物品是可见的
+    }
+    #endregion
+
+    #region 新增：IPointerClickHandler 实现
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // 只在非拖拽情况下响应点击，避免拖拽开始时也触发详情显示
+        if (m_GarageUIInstance != null && m_PartData != null && !eventData.dragging)
+        {
+            // 通常是鼠标左键点击或触摸点击
+            if (eventData.button == PointerEventData.InputButton.Left || eventData.pointerId < 0)
+            {
+                m_GarageUIInstance.ShowPartDetails(m_PartData);
+                Debug.Log($"PartItemUI: Clicked on {m_PartData.PartName}, showing details.");
+            }
+        }
     }
     #endregion
 } 

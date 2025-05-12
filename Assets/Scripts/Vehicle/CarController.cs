@@ -361,7 +361,7 @@ public class CarController : MonoBehaviour
             sourceToUse.playOnAwake = false; 
         }
         
-        if (sourceToUse.outputAudioMixerGroup == null && sfxAudioMixerGroup != null)
+        if (sfxAudioMixerGroup != null)
         {
             sourceToUse.outputAudioMixerGroup = sfxAudioMixerGroup;
         }

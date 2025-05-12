@@ -17,10 +17,15 @@ public class RaceManager : MonoBehaviour
     public Transform m_CheckpointsParent;
     [Tooltip("用于查找检查点GameObject的标签（如果m_CheckpointsParent为空）。")]
     public string m_CheckpointTag = "Checkpoint";
+
+    [Header("UI 管理器引用")]
+    [SerializeField, Tooltip("对InGameUIManager的引用，用于显示胜利面板")]
+    private InGameUIManager m_InGameUIManager;
     #endregion
 
     #region 私有字段
     private List<Checkpoint> m_OrderedCheckpoints = new List<Checkpoint>();
+    private bool m_IsRaceFinished = false;
     #endregion
 
     #region 公共属性
@@ -38,10 +43,53 @@ public class RaceManager : MonoBehaviour
     private void Awake()
     {
         InitializeCheckpoints();
+
+        if (m_InGameUIManager == null)
+        {
+            m_InGameUIManager = FindObjectOfType<InGameUIManager>();
+            if (m_InGameUIManager == null)
+            {
+                Debug.LogError("[RaceManager] 场景中未找到 InGameUIManager！无法显示胜利面板。", this);
+            }
+        }
+        m_IsRaceFinished = false;
     }
     #endregion
 
     #region 公共方法
+    /// <summary>
+    /// 当有玩家完成比赛时由PlayerRaceState调用。
+    /// </summary>
+    /// <param name="winningPlayer">完成比赛的玩家状态。</param>
+    public void NotifyRaceFinished(PlayerRaceState winningPlayer)
+    {
+        if (m_IsRaceFinished) return;
+        m_IsRaceFinished = true;
+
+        Debug.LogWarning($"🏁🏁🏁 RaceManager: 玩家 {winningPlayer.name} 已完成比赛! 🏁🏁🏁", winningPlayer.gameObject);
+
+        CarController carController = winningPlayer.GetComponentInParent<CarController>();
+        if (carController != null)
+        {
+            carController.SetInputDisabled(true);
+            Debug.Log("[RaceManager] 已禁用获胜玩家车辆输入。", carController.gameObject);
+        }
+        else
+        {
+            Debug.LogWarning("[RaceManager] 未能找到获胜玩家的CarController来禁用输入。", winningPlayer.gameObject);
+        }
+
+        if (m_InGameUIManager != null)
+        {
+            m_InGameUIManager.ShowWinPanel();
+            Debug.Log("[RaceManager] 已通知InGameUIManager显示胜利面板。", m_InGameUIManager);
+        }
+        else
+        {
+            Debug.LogError("[RaceManager] InGameUIManager 引用为空，无法显示胜利面板！", this);
+        }
+    }
+
     /// <summary>
     /// 根据ID获取检查点。
     /// </summary>
@@ -49,12 +97,10 @@ public class RaceManager : MonoBehaviour
     /// <returns>找到的检查点，如果未找到则返回null。</returns>
     public Checkpoint GetCheckpointByID(int _id)
     {
-        // 假设 m_OrderedCheckpoints 中的索引与 CheckpointID 一致
         if (_id >= 0 && _id < m_OrderedCheckpoints.Count && m_OrderedCheckpoints[_id].m_CheckpointID == _id)
         {
             return m_OrderedCheckpoints[_id];
         }
-        // 如果不一致（例如ID不连续），则需要查找
         var checkpoint = m_OrderedCheckpoints.FirstOrDefault(cp => cp.m_CheckpointID == _id);
         if (checkpoint == null)
         {
@@ -74,7 +120,6 @@ public class RaceManager : MonoBehaviour
             return m_OrderedCheckpoints[0].transform;
         }
         Debug.LogWarning("未能找到有效的起点线检查点 (ID 0 且 IsFinishLine 为 true)。请检查检查点配置。", this);
-        // 可以返回一个默认值或者 RaceManager 自己的 Transform 作为备用
         return (m_OrderedCheckpoints.Count > 0) ? m_OrderedCheckpoints[0].transform : transform;
     }
     #endregion
@@ -90,7 +135,6 @@ public class RaceManager : MonoBehaviour
 
         if (m_CheckpointsParent != null)
         {
-            // 获取父物体下所有激活和未激活的Checkpoint组件
             foundCheckpoints = m_CheckpointsParent.GetComponentsInChildren<Checkpoint>(true);
         }
         else
@@ -109,13 +153,11 @@ public class RaceManager : MonoBehaviour
             return;
         }
 
-        // 过滤掉可能为null的组件，并按 CheckpointID 排序
         m_OrderedCheckpoints = foundCheckpoints
             .Where(cp => cp != null)
             .OrderBy(cp => cp.m_CheckpointID)
             .ToList();
 
-        // 验证检查点配置
         if (m_OrderedCheckpoints.Count == 0) {
             Debug.LogError("过滤和排序后没有有效的检查点！", this);
             return;
@@ -124,7 +166,6 @@ public class RaceManager : MonoBehaviour
         bool hasFinishLineWithID0 = false;
         for (int i = 0; i < m_OrderedCheckpoints.Count; i++)
         {
-            // 验证ID是否连续（理想情况下，排序后的索引应等于ID）
             if (m_OrderedCheckpoints[i].m_CheckpointID != i)
             {
                 Debug.LogWarning($"检查点 '{m_OrderedCheckpoints[i].name}' (ID: {m_OrderedCheckpoints[i].m_CheckpointID}) 在排序后其ID与期望的索引 {i} 不匹配。请检查检查点ID是否有重复或间断。", m_OrderedCheckpoints[i]);
@@ -157,10 +198,7 @@ public class RaceManager : MonoBehaviour
     [ContextMenu("重新初始化并验证检查点 (编辑器)")]
     private void EditorForceReinitializeCheckpoints()
     {
-        // 此方法主要用于在编辑器中手动触发检查点加载和验证的逻辑
-        // 注意：FindGameObjectsWithTag 和 GetComponentsInChildren 在非播放模式下行为可能有所不同
-        // 但对于已存在于场景中的对象通常是有效的。
-        InitializeCheckpoints(); // 直接调用Awake中的逻辑
+        InitializeCheckpoints();
         if (m_OrderedCheckpoints.Count > 0) {
             UnityEditor.Selection.objects = m_OrderedCheckpoints.Select(cp => cp.gameObject).ToArray();
             Debug.Log($"已在编辑器中重新初始化并选中了 {m_OrderedCheckpoints.Count} 个检查点。", this);

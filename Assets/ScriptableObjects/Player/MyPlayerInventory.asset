@@ -12,16 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec0bc563ac88f5e4683ee1d6bbea09bd, type: 3}
   m_Name: MyPlayerInventory
   m_EditorClassIdentifier: 
-  m_CurrentVehicle: {fileID: 11400000, guid: 8eec3d7045986574aa0da654f8542321, type: 2}
-  m_EquippedEngine: {fileID: 0}
-  m_EquippedTires: {fileID: 0}
-  m_EquippedNOS: {fileID: 0}
+  m_CurrentVehicle: {fileID: 11400000, guid: d70cdbfff074e094fbfc93c5afb04743, type: 2}
+  m_EquippedEngine: {fileID: 11400000, guid: 900db294b3791574eb612d340752e700, type: 2}
+  m_EquippedTires: {fileID: 11400000, guid: e97251313244ce64aa283ec5f80b43b8, type: 2}
+  m_EquippedNOS: {fileID: 11400000, guid: 5b7d4f853ca0c4f44b56e3cc5d5f5cdd, type: 2}
   m_OwnedVehicles:
   - {fileID: 11400000, guid: d70cdbfff074e094fbfc93c5afb04743, type: 2}
+  - {fileID: 11400000, guid: b162eddbf3344684f958de6f8874d2c7, type: 2}
   m_OwnedParts:
-  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
-  - {fileID: 11400000, guid: 900db294b3791574eb612d340752e700, type: 2}
-  - {fileID: 11400000, guid: 60b0ad241977bb445abc0dfb63bc470b, type: 2}
-  - {fileID: 11400000, guid: 076d5ff209b4fca4795715637159809a, type: 2}
-  - {fileID: 11400000, guid: 8de50a8f027481e4891ba449a1e17c31, type: 2}
   - {fileID: 11400000, guid: 5b7d4f853ca0c4f44b56e3cc5d5f5cdd, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: 8de50a8f027481e4891ba449a1e17c31, type: 2}
+  - {fileID: 11400000, guid: 900db294b3791574eb612d340752e700, type: 2}
+  - {fileID: 11400000, guid: 900db294b3791574eb612d340752e700, type: 2}
+  - {fileID: 11400000, guid: e2c84d60be7ccda48ad8ad85cb16448d, type: 2}
+  - {fileID: 11400000, guid: e97251313244ce64aa283ec5f80b43b8, type: 2}
+  - {fileID: 11400000, guid: e97251313244ce64aa283ec5f80b43b8, type: 2}
+  m_PlayerCoins: 2188

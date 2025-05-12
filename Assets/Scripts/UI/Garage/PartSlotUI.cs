@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI; // If you use an Image component on the slot
 using TMPro; // If you use TextMeshPro for slot name/info
 
-public class PartSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class PartSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [Header("插槽配置")]
     [Tooltip("此插槽接受的零件类型")]
@@ -68,10 +68,43 @@ public class PartSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragH
         return m_CurrentlyDisplayedPart;
     }
 
+    #region IPointerClickHandler 实现
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // 只在非拖拽情况下响应点击
+        if (m_GarageUIInstance != null && !eventData.dragging)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left || eventData.pointerId < 0)
+            {
+                if (m_CurrentlyDisplayedPart != null)
+                {
+                    // 如果槽内有零件，显示详情
+                    m_GarageUIInstance.ShowPartDetails(m_CurrentlyDisplayedPart);
+                    Debug.Log($"PartSlotUI: Clicked on slot {m_SlotCategory} containing {m_CurrentlyDisplayedPart.PartName}, showing details.");
+                }
+                else
+                {
+                    // 如果槽内无零件，清除详情
+                    m_GarageUIInstance.ClearPartDetails();
+                    Debug.Log($"PartSlotUI: Clicked on empty slot {m_SlotCategory}, clearing details.");
+                }
+            }
+        }
+    }
+    #endregion
 
     #region IDropHandler 实现
     public void OnDrop(PointerEventData eventData)
     {
+        // --- 开始修改 ---
+        // 必须在车库模式下才能接收零件装备
+        if (m_GarageUIInstance != null && m_GarageUIInstance.GetCurrentUIMode() != GarageUI.GarageViewMode.OwnedParts)
+        {
+            Debug.Log($"PartSlotUI ({m_SlotCategory}): Ignoring OnDrop because UI is in Shop mode.");
+            return; // 不在车库模式，直接忽略拖放事件
+        }
+        // --- 结束修改 ---
+
         Debug.Log($"PartSlotUI ({m_SlotCategory}): OnDrop event triggered by {eventData.pointerDrag?.name ?? "Unknown Object"}.");
         if (m_GarageUIInstance == null)
         {
@@ -121,6 +154,8 @@ public class PartSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragH
             // 通知 GarageUI，我们正在尝试从这个插槽拖拽一个零件。
             // GarageUI 会找到对应的 PartItemUI，并使其开始响应拖拽。
             m_GarageUIInstance.StartDragFromSlot(this, m_CurrentlyDisplayedPart, eventData);
+            // 可选：拖拽开始时清除详情
+            // if (m_GarageUIInstance != null) m_GarageUIInstance.ClearPartDetails();
         }
         else
         {

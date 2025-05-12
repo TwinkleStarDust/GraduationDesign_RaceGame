@@ -27,6 +27,10 @@ public class PlayerRaceState : MonoBehaviour
     private KeyCode m_RespawnKey = KeyCode.B;
 
     private Rigidbody m_PlayerRigidbody;
+
+    // [Header("UI引用")] // 移除WinPanel引用
+    // [Tooltip("比赛结束时显示的胜利面板 (应挂载或其子对象挂载LeaderboardUI脚本)")]
+    // [SerializeField] private GameObject m_WinPanel; // 移除
     #endregion
 
     #region 公共属性
@@ -51,6 +55,7 @@ public class PlayerRaceState : MonoBehaviour
                 return;
             }
         }
+
         m_PlayerRigidbody = GetComponentInParent<Rigidbody>();
         if (m_PlayerRigidbody == null)
         {
@@ -148,9 +153,14 @@ public class PlayerRaceState : MonoBehaviour
                 if (m_LapTimes.Count >= m_RaceManager.TotalLapsToComplete)
                 {
                     // 完成所有圈数
-                    Debug.Log($"[PlayerRaceState] 🏁 比赛结束！成功完成所有 {m_RaceManager.TotalLapsToComplete} 圈。总用时: {TotalRaceTime:F2}s。", this.gameObject);
-                    Debug.LogWarning("🏁🏁🏁 玩家已到达终点！ 🏁🏁🏁", this.gameObject);
-                    enabled = false;
+                    // Debug.Log($"[PlayerRaceState] 🏁 比赛结束！成功完成所有 {m_RaceManager.TotalLapsToComplete} 圈。总用时: {TotalRaceTime:F2}s。", this.gameObject);
+                    // Debug.LogWarning("🏁🏁🏁 玩家已到达终点！ 🏁🏁🏁", this.gameObject);
+
+                    // 通知RaceManager比赛结束
+                    if (m_RaceManager != null)
+                    {
+                        m_RaceManager.NotifyRaceFinished(this);
+                    }
                 }
                 else
                 {
@@ -182,7 +192,10 @@ public class PlayerRaceState : MonoBehaviour
         }
     }
 
-    private void RespawnPlayer()
+    /// <summary>
+    /// 将玩家传送回上一个通过的检查点。
+    /// </summary>
+    public void RespawnPlayer()
     {
         if (m_LastCheckpointRespawnTransform != null)
         {
@@ -194,11 +207,11 @@ public class PlayerRaceState : MonoBehaviour
                 m_PlayerRigidbody.linearVelocity = Vector3.zero;
                 m_PlayerRigidbody.angularVelocity = Vector3.zero;
             }
-            Debug.Log($"[PlayerRaceState] 玩家已重生到检查点 {m_LastCorrectlyPassedCheckpointID} 的位置。", this);
+            Debug.Log($"[PlayerRaceState] 玩家已通过按钮重生到检查点 {m_LastCorrectlyPassedCheckpointID} 的位置。", this);
         }
         else
         {
-            Debug.LogWarning("[PlayerRaceState] 没有可用的重生点。", this);
+            Debug.LogWarning("[PlayerRaceState] 没有可用的重生点，无法通过按钮重生。", this);
         }
     }
 

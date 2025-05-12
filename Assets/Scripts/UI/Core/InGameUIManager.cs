@@ -13,7 +13,12 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private GameObject m_InGamePauseMenuPanel;
     [Tooltip("游戏内设置面板 (如果与主菜单设置面板不同)")]
     [SerializeField] private GameObject m_InGameSettingsPanel; 
-    // 可以添加其他游戏内UI元素，如HUD、比赛结束面板等
+
+    [Header("游戏状态面板")] // 新增Header
+    [SerializeField, Tooltip("比赛结束时显示的胜利/排行榜面板")]
+    private GameObject m_WinPanel; // 新增
+    [SerializeField, Tooltip("对WinPanel上的LeaderboardUI组件的引用")]
+    private LeaderboardUI m_LeaderboardUI; // 新增
 
     private bool m_IsPauseMenuUIActive = false;
     private CarController m_PlayerCarController; // 缓存玩家车辆控制器
@@ -32,7 +37,7 @@ public class InGameUIManager : MonoBehaviour
             return;
         }
 
-        // 尝试查找玩家车辆控制器，游戏开始时车辆可能已存在
+        // 尝试查找玩家车辆控制器
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
@@ -40,7 +45,21 @@ public class InGameUIManager : MonoBehaviour
         }
         if (m_PlayerCarController == null)
         {
-            Debug.LogWarning("InGameUIManager: 未在场景中找到带有 'Player' 标签且挂有CarController的玩家车辆! 输入禁用功能可能受影响。");
+            Debug.LogWarning("InGameUIManager: 未在场景中找到带有 'Player' 标签且挂有CarController的玩家车辆! 输入禁用功能可能受影响。", this);
+        }
+
+        // 确保引用了LeaderboardUI (如果WinPanel已设置)
+        if (m_WinPanel != null && m_LeaderboardUI == null)
+        {
+            m_LeaderboardUI = m_WinPanel.GetComponentInChildren<LeaderboardUI>();
+            if (m_LeaderboardUI == null)
+            {
+                Debug.LogError("InGameUIManager: 在指定的WinPanel下未能找到LeaderboardUI组件！", m_WinPanel);
+            }
+        }
+        else if (m_WinPanel == null)
+        {
+            Debug.LogWarning("InGameUIManager: WinPanel 未在Inspector中分配。", this);
         }
     }
 
@@ -48,6 +67,7 @@ public class InGameUIManager : MonoBehaviour
     {
         if (m_InGamePauseMenuPanel != null) m_InGamePauseMenuPanel.SetActive(false);
         if (m_InGameSettingsPanel != null) m_InGameSettingsPanel.SetActive(false);
+        if (m_WinPanel != null) m_WinPanel.SetActive(false); // 确保胜利面板初始隐藏
     }
 
     private void Update()
@@ -159,9 +179,61 @@ public class InGameUIManager : MonoBehaviour
     {
         if (m_InGamePauseMenuPanel != null) m_InGamePauseMenuPanel.SetActive(false);
         if (m_InGameSettingsPanel != null) m_InGameSettingsPanel.SetActive(false);
+        if (m_WinPanel != null) m_WinPanel.SetActive(false); // 同时隐藏胜利面板
         m_IsPauseMenuUIActive = false;
         // 可以在此启用玩家输入，如果需要的话
         // if (m_PlayerCarController != null) m_PlayerCarController.SetInputDisabled(false);
+    }
+
+    /// <summary>
+    /// 激活胜利面板并填充排行榜。
+    /// </summary>
+    public void ShowWinPanel()
+    {
+        if (m_WinPanel == null)
+        {
+            Debug.LogError("InGameUIManager: WinPanel 未分配，无法显示！", this);
+            return;
+        }
+
+        HideAllInGamePanels(); // 先隐藏其他游戏内面板
+
+        Debug.Log("[InGameUIManager] 正在尝试激活WinPanel...", this);
+        m_WinPanel.SetActive(true);
+
+        // 检查是否真的激活了
+        if (!m_WinPanel.activeSelf)
+        {
+            Debug.LogError("[InGameUIManager] 尝试激活WinPanel失败，请检查是否有其他脚本在禁用它。", m_WinPanel);
+            return;
+        }
+        Debug.Log("[InGameUIManager] WinPanel已激活。", this);
+
+        // 填充排行榜
+        if (m_LeaderboardUI != null)
+        {
+            Debug.Log("[InGameUIManager] 正在尝试填充Leaderboard...", m_LeaderboardUI);
+            m_LeaderboardUI.PopulateLeaderboard();
+            Debug.Log("[InGameUIManager] 已显示胜利面板并更新排行榜", this);
+        }
+        else
+        {
+            Debug.LogError("[InGameUIManager] LeaderboardUI 引用为空，无法填充排行榜！", this);
+        }
+
+        // 强制将相机切换回第三人称视角
+        Vehicle.VehicleCamera vehicleCamera = FindObjectOfType<Vehicle.VehicleCamera>();
+        if (vehicleCamera != null)
+        {
+            Debug.Log("[InGameUIManager] 找到 VehicleCamera，强制切换到 ThirdPerson 视角。", vehicleCamera);
+            vehicleCamera.SetViewMode(Vehicle.VehicleCamera.CameraViewMode.ThirdPerson);
+        }
+        else
+        {
+            Debug.LogWarning("[InGameUIManager] 未能在场景中找到 VehicleCamera，无法切换视角。", this);
+        }
+
+        // Time.timeScale = 0f; // 移除时间暂停
     }
 
     /// <summary>
